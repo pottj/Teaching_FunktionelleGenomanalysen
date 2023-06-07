@@ -50,3 +50,15 @@ rsconnect/
 
 # other stuff
 figures/*
+slides/*.aux
+slides/*.log
+slides/*.nav
+slides/*.out
+slides/*.snm
+slides/*.synctex.gz
+slides/*.toc
+
+
+
+
+
