@@ -1,0 +1,501 @@
+\documentclass{beamer}
+\usetheme{Boadilla}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{ngerman}
+
+\title{Funktionelle Genomanalysen 2023}
+\subtitle{Übung 1: Grundlagen der genetischen Statistik}
+\author{Dr. Janne Pott}
+\date{09.-11. Juni 2023}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\section{Introduction}
+
+\begin{frame}{Vorstellung}
+\begin{itemize}
+    \item Name
+    \item Fachrichtung 
+    \item Standort
+    \item Erwartung an Übung
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Vorstellung}
+\begin{itemize}
+    \item Name: Janne Pott
+    \item Fachrichtung 
+    \begin{itemize}
+        \item Genetische Statistik im Allgemeinen
+        \item Entwicklung neuer kausalen Methoden unter Verwendung von Genetikdaten im Speziellen (Stichwort \textbf{Mendelische Randomisierung})
+    \end{itemize}
+    \item Standort: MRC BSU, University of Cambridge, UK 
+    \item Erwartung an Übung
+    \begin{itemize}
+        \item Veranschaulichung einiger Konzepte
+        \item Hinweise auf praktische Anwendung 
+        \item Kontakt zu Medizinern
+    \end{itemize}
+\end{itemize}    
+\end{frame}
+
+\begin{frame}{Hinweise zu Moodle}
+\begin{itemize}
+    \item Alle relevanten Unterlagen stehen auf Moodle zur Verfügung
+    \begin{itemize}
+        \item Übungsaufgaben
+        \item Folien
+        \item Video (vermutlich)
+    \end{itemize}
+    \item Asynchrones Lernen: Multiple Choice Aufgaben zu
+    \begin{itemize}
+        \item SNP-Clusterplots
+        \item GWAS-Plots
+        \item ...
+    \end{itemize}
+    \item Forum: bitte Nutzen, andere haben evtl. die gleiche Frage!
+\end{itemize} 
+\end{frame}
+
+\begin{frame}{Hinweise zur Übung}
+\begin{itemize}
+    \item Die Aufgaben werden in der Übung gemeinsam erarbeitet, daher bitte \textbf{Kamera an}. 
+    \item Zur Lösung von manchen Aufgaben wird ein Taschenrechner o.ä. benötigt. 
+    \item Am Ende des Moduls wird eine Musterlösung bereitgestellt. 
+\end{itemize}
+\end{frame}
+
+\section{Exercise 0}
+
+\begin{frame}{Präsenzaufgabe 1}
+Definieren Sie folgende Begriffe
+
+\begin{itemize}
+    \item SNP
+    \item nicht-synonyme Mutation
+    \item Frameshift-Mutation
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Präsenzaufgabe 1 - Lösung}
+
+\begin{itemize}
+    \item SNP: single nucleotid polymorphism = Einzelnukleotid Polymorphismus = Punktmutation
+    \begin{itemize}
+        \item Variation eines Basenpaares an einer Stelle im Genom
+        \item Bsp.: SNP in mcm6 führt zu Laktoseintoleranz
+    \end{itemize}
+    \item nicht-synonyme Mutation: SNP im codierenden Bereich eines Gens, der dazu führt, dass eine andere Aminosäure eingebaut wird.
+    \begin{itemize}
+        \item betrifft nur eine Aminosäure
+    \end{itemize}
+    \item Frameshift-Mutation: SNP im codierenden Bereich eines Gens, der dazu führt, dass das Leseraster der RNA-Polymerase sich ändert. 
+        \begin{itemize}
+        \item betrifft alle folgenden Aminosäure bzw Länge des Proteins
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\section{Exercise 1}
+
+\begin{frame}{Aufgabe 1: Crossing-over \& LD (1)}
+\begin{enumerate}
+    \item Definieren Sie anhand der Abbildung \ref{fig:CrossingOver} den Begriff \textbf{Crossing-over}.
+    \item Erläutern Sie den Zusammenhang zwischen der \textbf{Crossing-over} und \textbf{LD-Struktur} des Genoms.
+    \item Betrachten Sie Tabelle \ref{tab:4FT}. Bestimmen Sie die \textbf{Randverteilungen} und berechnen Sie das \textbf{LD-Maß $r^2$}! Formel: $$r^2 = \frac{(p_{00}p_{11} - p_{01}p_{10})^2}{p_{0.}p_{.0}p_{1.}p_{.1}}$$
+    \item Interpretieren Sie das Ergebnis! Was sind die \textbf{häufigen Haplotypen}? Was bedeutet dies für ein doppelt heterozygotes Individuum?
+    \item Würden Sie zwischen SNP 1 und SNP 3 ein höheres oder niedrigeres $r^2$ erwarten? Begründen Sie Ihre Entscheidung!
+\end{enumerate} 
+\end{frame}
+
+\begin{frame}{Aufgabe 1: Crossing-over \& LD (1)}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.5\textwidth]{_figures/Exercise11_CrossingOver_mod.jpg}
+\caption{Crossing-over eines Chromosoms. Modifiziert aus Alberts et al., Molecular Biology of the Cell, 2008}
+\label{fig:CrossingOver}
+\end{center}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Aufgabe 1: Lösung (1)}
+
+\textbf{Crossing-over}: Austausch von Teilen homologer Chromosomen während der Meiose $\longrightarrow$ Rekombination, Mischung der Erb-Informationen der Eltern
+
+\begin{itemize}
+    \item Step 1: DNA Replikation der väterlichen und mütterlichen DNA
+    \item Step 2: Alignierung der duplizierten homologen Chromosomen
+    \item z.T. Interaktion zwischen komplementären DNA-Sequenzen 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Aufgabe 1: Lösung (2)}
+
+\textbf{Haploblöcke} wechseln sich mit \textbf{Rekombinations-Hotspots} ab. Dort finden die Crossing-overs mit erhöhter Wahrscheinlichkeit statt. 
+
+\begin{itemize}
+    \item SNPs im gleichen Haploblock haben tendenziell hohes paarweises LD (werden häufiger gemeinsam vererbt, statistisch \textbf{abhängig} voneinander)
+    \item SNPs in unterschiedlichen Haploblöcken haben tendenziell niedriges LD (werden seltener gemeinsam vererbt, statistisch \textbf{unabhängig} voneinander) 
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Aufgabe 1: Lösung (3)}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{_figures/Slides11_Haplotypes.jpg}
+\caption{LD-Struktur des Genoms.}
+\label{fig:Haploblock}
+\end{center}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Aufgabe 1: Crossing-over \& LD (3)}
+\begin{table}[h]
+\caption{4-Felder-Tafel der beiden biallelischen SNPs: SNP 1 (Allele A1/B1) und SNP 2 (Allele A2/B2) aus Daten von 500 gemessenen diploiden Individuen} \label{tab:4FT} 
+\begin{center}
+\begin{tabular}[h]{c|cc}
+ & SNP 1 - Allel A1 & SNP 1 - Allel B1 \\
+\hline
+SNP 2 - Allel A2 & 570 & 15 \\
+SNP 2 - Allel B2 & 25 & 390 \\
+\end{tabular}
+\end{center}
+\end{table} 
+
+\begin{align*}
+r^2 &= \frac{(p_{00}p_{11} - p_{01}p_{10})^2}{p_{0.}p_{.0}p_{1.}p_{.1}} 
+\end{align*}
+
+\end{frame}
+
+\begin{frame}{Aufgabe 1: Lösung (4)}
+\begin{table}[h]
+\caption{4-Felder-Tafel der beiden biallelischen SNPs: SNP 1 (Allele A1/B1) und SNP 2 (Allele A2/B2) aus Daten von 500 gemessenen diploiden Individuen} \label{tab:4FT_L} 
+\begin{center}
+\begin{tabular}[h]{c|cc|c}
+ & Allel A1 & Allel B1 & Randverteilung \\
+\hline
+Allel A2 & $p_{00}$=570 & $p_{01}$=15 & $p_{0.}$=585 \\
+Allel B2 & $p_{10}$=25 & $p_{11}$=390 & $p_{1.}$=415 \\
+\hline
+Randverteilung & $p_{.0}$=595 & $p_{.1}$=405 & 1000
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{align*}
+r^2 &= \frac{(p_{00}p_{11} - p_{01}p_{10})^2}{p_{0.}p_{.0}p_{1.}p_{.1}}  \\
+ &= \frac{570 \cdot 390 - 25 \cdot 15)^2}{585 \cdot 595 \cdot 415 \cdot 405}  \\
+ &= 0.842 \notag \\
+\end{align*}
+\end{frame}
+
+\begin{frame}{Aufgabe 1: Lösung (5)}
+\begin{itemize}
+    \item Hohes LD zwischen SNP1 und SNP2, nicht statistisch unabhängig! 
+    \item Häufige Haplotypen: A1A2 und B1B2
+    \item Selten Haplotypen: A1B2 und B1A2
+    \item Erwartung: niedrigeres LD zwischen SNP 1 und 3
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Zusatz zu LD (1)}
+Was ist LD und warum ist es wichtig in der Funktionelle Genomanalysen? 
+\end{frame}
+
+\begin{frame}{Zusatz zu LD (2)}
+\begin{itemize}
+    \item Allele sind in LD wenn sie häufiger gemeinsam vorkommen als zufällig erwartet (Korrelation)
+    \item $r^2$ ist ein häufig genutztes Maß für LD 
+    \item $r^2$ ist zwischen 0 (kein LD) and 1 (perfekte Korrelation).
+    \item LD kann von verschiedenen Faktoren beeinflusst werden: 
+    \begin{itemize}
+        \item Mutationsrate
+        \item Genetischer Drift
+        \item Nicht-zufällige Paarung (Zucht)
+        \item Populationsstruktur
+        \item Selektion
+        \item Genkopplung
+        \item Rekombinationsrate
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Zusatz zu LD (3)}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{_figures/Slides11_LD_1.jpg}
+\caption{Recombination between unlinked loci (= not in LD).}
+\label{fig:LD1}
+\end{center}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Zusatz zu LD (4)}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{_figures/Slides11_LD_2.jpg}
+\caption{Recombination between linked loci (= in LD).}
+\label{fig:LD2}
+\end{center}
+\end{figure}
+\end{frame}
+
+\section{Exercise 2}
+
+\begin{frame}{Aufgabe 2: HWE (1)}
+Für den biallelischen SNP 1 mit Allelen A/B wird folgende Genotypverteilung beobachtet:
+
+\begin{table}[here]
+\begin{center}
+\begin{tabular}[h]{ccccc}
+Genotyp & AA & AB & BB & Missing \\
+\hline
+Häufigkeit & 824 & 1326 & 463 & 87\\
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{enumerate}
+    \item Welche Modellannahmen werden Hardy-Weinberg-Gleichgewicht (HWE) getroffen (Stichwort \textbf{ideale Population})?
+    \item Bestimmen Sie auf drei Nachkommastellen genau die 
+    \begin{enumerate}
+        \item \textbf{Callrate} des SNPs,
+        \item \textbf{Allelfrequenzen} für A und B, und 
+        \item \textbf{erwartete Genotypverteilung} im HWE!
+    \end{enumerate}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Aufgabe 2: Lösung (1)}
+\textbf{Ideale Population}:
+
+\begin{itemize}
+    \item Diploide Organismen
+    \item Nur geschlechtliche Vermehrung
+    \item Keine Überlappung der Generationen
+    \item Zufällige Paarungen
+    \item Unendliche Populationsgröße
+    \item Allelfrequenzen sind in beiden Geschlechtern gleich
+    \item Keine Migration, Gendrift, Mutation oder Selektion
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Aufgabe 2: Lösung (2)}
+\textbf{Callrate}: 
+
+$$CR =\frac{N_1}{N_0} = \frac{824 + 1326 + 463}{824 + 1326 + 463 + 87} = \frac{2613}{2700}=0.968$$
+
+\textbf{Allelfrequenzen}: 
+
+$$p = AF_A = \frac{2 \cdot AA + AB}{2 \cdot N_1} = \frac{2 \cdot 824 + 1326}{2 \cdot 2613} = 0.569$$
+
+$$q = AF_B = \frac{2 \cdot BB + AB}{2 \cdot N_1} = \frac{2 \cdot 463 + 1326}{2 \cdot 2613} = 0.431$$
+
+\end{frame}
+
+\begin{frame}{Aufgabe 2: Lösung (3)}
+\textbf{Erwartete Genotypverteilung}: Im HWE gilt: 
+
+$$1 = p+q = (p+q)^2 = p^2 + 2pq + q^2$$
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}[h]{ccccc}
+Genotyp & AA & AB & BB & Missing \\
+\hline
+Häufigkeit & 824 & 1326 & 463 & 87\\
+\hline
+$p_{obs}$ & 0.315 & 0.507 & 0.177 & \\
+\hline
+$p_{exp}$ & $p^2$=0.324 & $2pq$=0.490 & $q^2$=0.186 &  \\
+\end{tabular}
+\end{center}
+\end{table}
+\end{frame}
+
+\begin{frame}{Aufgabe 2: HWE (2)}
+
+\textbf{Zusatz}: Testen Sie auf HWE mit 5\% Irrtumswahrscheinlichkeit. Stellen Sie dazu die \textbf{Nullhypothese} auf. Berechnen Sie die \textbf{Teststatistik} für diese und interpretieren Sie das Ergebnis. 
+
+Formel: $$\sum_i\frac{(O_i - E_i)^2}{E_i}, i\in {AA, AB, BB}$$
+  
+\end{frame}
+
+\begin{frame}{Aufgabe 2: Lösung (4)}
+\textbf{Nullhypothese}: Die beobachteten Häufigkeiten der Genotypen befinden sich im Hardy-Weinberg-Gleichgewicht. 
+
+Um die Hypothese zu testen, muss das $\chi^2$ bestimmt werden: 
+
+$$ \chi^2 = N_1 \sum \frac{(p_{obs} - p_{exp})^2}{p_{exp}}= 3.1416$$
+Da $m=2$ Allele betrachten werden, haben wir einen Freiheitsgrad: 
+
+$$df = \frac{m(m-1)}{2}=\frac{2 \cdot 1}{2}=1 \rightarrow \chi_1^2=3.841$$
+
+Das berechnete $\chi^2$ ist kleiner als die Schranke $\chi_1^2$, daher kann die Nullhypothese nicht verworfen werden. 
+
+\end{frame}
+
+\begin{frame}{Zusatz zu HWE (1)}
+Warum ist HWE wichtig in der Funktionelle Genomanalysen?    
+\end{frame}
+
+\begin{frame}{Zusatz zu HWE (2)}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=1\textwidth]{_figures/Slides12_HWE.jpg}
+\caption{Punnett square and De Finetti diagram.}
+\label{fig:HWE}
+\end{center}
+\end{figure}
+\end{frame}
+
+\section{Exercise 3}
+
+\begin{frame}{Aufgabe 3: Stammbäume (1)}
+\begin{enumerate}
+    \item Definieren Sie die Begriffe \textbf{dominant}, \textbf{rezessiv} und \textbf{Penetranz}.
+    \item Betrachten Sie die drei Stammbäume und geben Sie folgendes an:
+    \begin{itemize}
+        \item eine Legende,
+        \item die Träger/in,
+        \item das wahrscheinlichstes Segregationsmuster mit Begründung
+    \end{itemize}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Aufgabe 3: Lösung (1)}
+\begin{itemize}
+    \item \textbf{dominant}: eine Kopie des Risiko-Allels reicht aus, um den Phänotyp zu erzeugen
+    \item \textbf{rezessiv}: nur wenn das Risiko-Allel homozygot vorliegt, kommt es zum Phänotypen
+    \item \textbf{Penetranz}: WSK, mit der ein bestimmter Genotyp zur Ausbildung des zugehörigen Phänotyps führt
+    \item Legende:
+    \begin{itemize}
+        \item Form = Geschlecht (Kreis: Frau; Quadrat: Mann)
+        \item Füllung = Phänotyp/Krankheit (Keine Füllung: gesund; rote Füllung: erkrankt; ein Punkt im Kreis oder Quadrat: Träger/in)
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Aufgabe 3: Plot A}
+Bestimmen Sie den Erbgang des vorliegenden Stammbaums und den Genotyp aller Mitglieder!
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{_figures/Slides13_FamilyTree_A1.jpg}
+\caption{Stammbaum A.}
+\label{fig:tree_A1}
+\end{center}
+\end{figure}    
+\end{frame}
+
+\begin{frame}{Aufgabe 3: Plot A - Lösung}
+Lösung: autosomal-rezessiv, weil
+
+\begin{itemize}
+    \item Beide Geschlechter betroffen
+    \item Generationen können übersprungen werden  
+\end{itemize}
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{_figures/Slides13_FamilyTree_A2.jpg}
+\caption{Stammbaum A - Lösung.}
+\label{fig:tree_A2}
+\end{center}
+\end{figure}    
+\end{frame}
+
+\begin{frame}{Aufgabe 3: Plot B}
+Bestimmen Sie den Erbgang des vorliegenden Stammbaums und den Genotyp aller Mitglieder!
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{_figures/Slides13_FamilyTree_B1.jpg}
+\caption{Stammbaum B.}
+\label{fig:tree_B1}
+\end{center}
+\end{figure}    
+\end{frame}
+
+\begin{frame}{Aufgabe 3: Plot B - Lösung}
+Lösung: autosomal-dominant, weil
+
+\begin{itemize}
+    \item Beide Geschlechter betroffen
+    \item jede Generation betroffen  
+\end{itemize}
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{_figures/Slides13_FamilyTree_B2.jpg}
+\caption{Stammbaum B - Lösung.}
+\label{fig:tree_B2}
+\end{center}
+\end{figure}    
+\end{frame}
+
+\begin{frame}{Aufgabe 3: Plot C}
+Kinderwunsch in Generation III. Bestimmen Sie den Erbgang und den Genotypen der Mutter. Mit welcher Wahrscheinlichkeit werden die Kinder dieses Paares erkranken?
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{_figures/Slides13_FamilyTree_C1.jpg}
+\caption{Stammbaum C.}
+\label{fig:tree_C1}
+\end{center}
+\end{figure}    
+\end{frame}
+
+\begin{frame}{Aufgabe 3: Plot C - Lösung}
+Lösung: X-chromosomal rezessiv, weil
+
+\begin{itemize}
+    \item Deutlich mehr Männer betroffen
+    \item Generationen können übersprungen werden  
+\end{itemize}
+
+Mutter hat 50\% Chance Trägerin zu sein
+
+\begin{itemize}
+    \item Töchter werden alle gesund sein (können Trägerinnen sein)
+    \item Söhne werden zu 25\% erkranken (WSK(Mutter Trägerin) * WSK(rezessives Allel wird weitergegeben) = 0.5 * 0.5 = 0.25)
+\end{itemize}
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.5\textwidth]{_figures/Slides13_FamilyTree_C2.jpg}
+\caption{Stammbaum C - Lösung.}
+\label{fig:tree_C2}
+\end{center}
+\end{figure}    
+\end{frame}
+
+\section{Summary}
+
+\begin{frame}{Zusammenfassung}
+
+\begin{itemize}
+    \item Warum ist LD wichtig in der Funktionelle Genomanalysen?
+    \begin{itemize}
+        \item (Un-)Abhängigkeit von genetischen Markern in statistischen Analysen!
+    \end{itemize}
+    \item Warum ist HWE wichtig in der Funktionelle Genomanalysen?
+    \begin{itemize}
+        \item Annahme einer best. Verteilung in stat. Analysen
+        \item Kenntnis von best. Eigenschaften (z.B. Varianz)
+    \end{itemize}
+    \item Warum sind Segregationsmuster wichtig in der Funktionelle Genomanalysen?
+    \begin{itemize}
+        \item Relevant in Festlegung des Regressionsmodelles
+    \end{itemize}
+\end{itemize}
+    
+\end{frame}
+
+\end{document}

@@ -1,0 +1,142 @@
+\documentclass{beamer}
+\usetheme{Boadilla}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{ngerman}
+\usepackage{hyperref}
+
+\title{Funktionelle Genomanalysen 2023}
+\subtitle{Asynchrone Übung zu Heritabilität}
+\author{Dr. Janne Pott}
+\date{09.-11. Juni 2023}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Definition}
+
+\textbf{Heritabilität}: Anteil der Varianz eines Merkmals, der durch die Genetik erklärt wird. 
+
+Beantwortet in wie fern Gene den Unterschied (Varianz) einer Eigenschaft erklären, \textbf{NICHT} welche Gene die Eigenschaft beeinflussen. 
+
+$$ h^2 = \frac{Var(G)}{Var(Merkmal)} = \frac{Var(G)}{Var(G) + Var(U) + 2 \cdot Cov(G, U)}$$
+
+\end{frame}
+
+\begin{frame}{Methoden}
+\begin{itemize}
+    \item Verwandtschaftstudien bzw Zwillingsstudien $h^2$
+    \begin{itemize}
+        \item Falconers Formel $h^2=2 \cdot (r(MZ) - r(DZ))$ 
+        \item Vergleich der Merkmalskonkordanz zwischen monozygoten (MZ) und dizygoten (DZ) Zwilligen
+    \end{itemize}
+    \item Genomweit via Querschnittsstudien von unverwandten Personen $h_{SNP}^2$
+    \begin{itemize}
+        \item Genetik-Daten vorhanden: GREML (z.B. in GCTA implementiert)
+        \item Nur Summary Statistics vorhanden: LD Score Regression (python-basiert, bislang nur für weiße Europäer/Amerikaner etabliert)
+    \end{itemize}
+    \item SNP-basiert $h_{sSNP}^2$
+    \begin{itemize}
+        \item $r^2$ aus linearen Regressionsmodell ohne weitere Adjustierung
+        \item Einzelschätzer pro SNP 
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Missing heritability}
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=1\textwidth]{_figures/Slides24_MissingHeritab.jpg}
+\label{fig:Heritab}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Was Heritabilität ist (1/3)}
+    \begin{itemize}
+        \item Semi-formale Definition:
+        \begin{itemize}
+            \item Heritabilität ist der Anteil der Variabilität eines Merkmals, der durch Genetik erklärt werden kann. Es misst also inwieweit Unterschiede in der DNA Unterschiede in einem Merkmal erklären können.
+            \item Heritabilität ist definiert zwischen 0 (Genetik erklärt nichts) und 1 (Genetik erklärt alles) 
+            \item Beispiel Körpergröße: $h^2 \approx 0.8$ 
+            \item Beispiel Schlafdauer: $h^2 \approx 0.15-0.2$
+        \end{itemize}
+        \item Heritabilität schätzt, wie gut wir ein Merkmal anhand der Genetik vorhersagen könnten
+        \begin{itemize}
+            \item wenn wir alle relevanten genetischen Auswirkungen vollständig verstanden hätten (was wir jedoch noch nicht haben!)
+            \item quasi eine Obergrenze dafür, wie gut diese Vorhersage jemals sein könnte, wenn wir mehr über die Genetik des Merkmals erfahren.
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Was Heritabilität ist (2/3)}
+    \begin{itemize}
+        \item Heritabilität misst wie wichtig Genetik für ein Merkmal ist. 
+        \begin{itemize}
+            \item Hohe Heritabilität bedeutet \textbf{nicht} notwendigerweise dass es monogenetisch vererbt wird. 
+            \item Hohe Heritabilität bedeutet, dass der Gesamtbeitrag direkter und indirekter kausaler Effekte und anderer Korrelationen zwischen bestimmten DNA-Varianten und dem Merkmal ausreichen, um informativ zu sein.
+        \end{itemize}
+        \item Heritabilität ist eine Eigenschaft einer Population, nicht eines Individuums.
+        \begin{itemize}
+            \item Heritabilität erklärt \textbf{nicht}, warum jemand eine Krankheit erleidet.
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Was Heritabilität ist (3/3)}
+    \begin{itemize}
+        \item Heritabilität ist abhängig von der Messmethode.
+        \begin{itemize}
+            \item Je schwieriger ein Merkmal zu messen ist, desto größer wird der zufällige Messfehler. Als Konsequenz wird die Heritabilität kleiner, da der Messfehler nicht genetisch ist. 
+            \item Heritabilität ist abhängig davon, wer misst (Selbstbericht vs. gesicherte Diagnose vs. echte Messung)
+            \item Heritabilität ist abhängig davon, wie man das Merkmal festlegt (Einnahme eines bestimmten Medikaments vs Diagnose)
+        \end{itemize}
+        \item Heritabilität ist abhängig von der Population.
+        \begin{itemize}
+            \item Heritabilität eines Merkmals in einer Population aus einer bestimmten Land, Ethnie, Alter, Sozioökonomischer Status, o.ä. kann sich von der aus einer anderen Population mit anderem genetischen Background unterscheiden.
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Was Heritabilität nicht ist (1/2)}
+\begin{itemize}
+    \item Heritabilität ist nicht Schicksal. 
+    \begin{itemize}
+        \item Nur weil ein Merkmal eine hohe Heritabilität aufweist und in deinen Eltern vorkommt, heißt das nicht, dass man selbst das Merkmal hat. 
+        \item Es mag wahrscheinlicher sein, aber es ist nicht unvermeidlich.
+    \end{itemize}
+    \item Heritabilität misst nicht unsere Fähigkeit, das Merkmal zu beeinflussen.
+    \begin{itemize}
+        \item Haarfarbe ist hoch heritabel, aber jeder von uns kann sich die Haare färben wie er oder sie will (inklusive Farben die es in der Natur nicht gibt).
+        \item BMI ist heritabel, aber durch Diät und Bewegung haben ebenfalls einen Einfluss auf BMI.
+        \item Heritabilität ist nicht die finale Antwort auf “nature vs. nurture”.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Was Heritabilität nicht ist (2/2)}
+\begin{itemize}
+    \item Heritabilität ist nicht unveränderlich. 
+    \begin{itemize}
+        \item Änderung in der Umwelt wird eine Änderung in der Heritabilität erzeugen
+    \end{itemize}
+    \item Hohe Heritabilität bedeutet nicht, dass Gruppenunterschiede auf Genetik basieren.
+    \begin{itemize}
+        \item Historisch: Leider wurden “Rassenunterschiede“ bei den IQ-Werten auf die Genetik zurückgeführt
+        \item \textbf{ABER}: Heritabilität hängt von der Messmethode, Population und Umgebung ab, und kann sich im Laufe der Zeit ändern!
+        \item Es ist daher nicht zulässig, die geschätzte Heritabilität eines Merkmals als Beweis für „inhärente“ Unterschiede zwischen Populationen zu verwenden.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Additional Reading}
+\begin{itemize}
+    \item \href{http://www.nealelab.is/blog/2017/9/13/heritability-101-what-is-heritability}{Heritability 101} by Raymond Walters with contributions from Claire Churchhouse and Rosy Hosking
+    \item For more academic discussion of pitfalls and misconceptions in understanding heritability: \href{https://www.nature.com/articles/nrg2322}{Visscher et al 2008 }
+\end{itemize}
+\end{frame}
+\end{document}

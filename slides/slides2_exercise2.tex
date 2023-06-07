@@ -1,0 +1,519 @@
+\documentclass{beamer}
+\usetheme{Boadilla}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{ngerman}
+
+\title{Funktionelle Genomanalysen 2023}
+\subtitle{Übung 2: GWAS und Sekundäranalysen}
+\author{Dr. Janne Pott}
+\date{09.-11. Juni 2023}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\section{Introduction}
+
+\begin{frame}{Übersicht Ablauf}
+\begin{itemize}
+    \item Fragen zur Vorlesung?
+    \item GWAS Regressionsmodelle
+    \item Mendelian Randomization + Kolokalisation 
+\end{itemize}
+\end{frame}
+
+\section{Exercise 1}
+
+\begin{frame}{Aufgabe 1 - Ausgangslage}
+\begin{itemize}
+    \item autosomale SNPs rs123456 \& rs127890
+    \item normalverteilter Phänotyp $X$
+    \item vier unabhängige Studien
+    \item SNPs in Genregion $ABC$
+    \item Ihre Rolle
+    \begin{itemize}
+        \item Verantwortlich für Analysen in Studie 1
+        \item Interessiert an Zusammenhang zwischen $ABC$ und $X$
+    \end{itemize}
+\end{itemize} 
+\end{frame}
+
+\begin{frame}{Aufgabe 1a: Regressionsmodelle (2)}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.65\textwidth]{_figures/Slides21_BoxplotSNPs.jpeg}
+\caption{Boxplots}
+\label{fig:Boxplots}
+\end{center}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Aufgabe 1a: Regressionsmodelle (3)}
+\begin{itemize}
+    \item Welches Regressionsmodell wäre hier geeignet?
+    \item Stellen Sie das Modell auf! 
+    \item Was ist die Nullhypothese?
+    \item Kann es zwischen dominant \& rezessiv unterscheiden?
+    \item Wie kommt man von diesem Regressionsmodell zu einer GWAS?
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Lösung 1a}
+\begin{itemize}
+    \item rs123456 sieht nach additivem Effekt aus: pro Allel B ein Effekt
+    \item rs127890 sieht nach rezessivem Effekt aus: nur Unterschied zwischen AA/AB und BB
+\end{itemize}
+
+\textbf{Option 1} (typische GWAS Regression, additives Modell):
+
+$$ y = \mu + \beta_1 \cdot G + \epsilon \text{; mit AA=0, AB=1, und BB=2}$$
+
+Nullhypothese: Der SNP $G$ hat keinen Effekt auf $X$ ($H_0: \beta_1 = 0$)
+
+\end{frame}
+
+\begin{frame}{Lösung 1a}
+\begin{itemize}
+    \item rs123456 sieht nach additivem Effekt aus: pro Allel B ein Effekt
+    \item rs127890 sieht nach rezessivem Effekt aus: nur Unterschied zwischen AA/AB und BB
+\end{itemize}
+
+\textbf{Option 1} (typische GWAS Regression, additives Modell):
+
+$$ y = \mu + \beta_1 \cdot G + \epsilon \text{; mit AA=0, AB=1, und BB=2}$$
+
+\textbf{Option 2} (rezessives Modell):
+
+$$ y = \mu + \beta_1 \cdot G + \epsilon \text{; mit AA=0, AB=0, und BB=1}$$
+
+Nullhypothese: Der SNP $G$ hat keinen Effekt auf $X$ ($H_0: \beta_1 = 0$)
+
+\end{frame}
+
+\begin{frame}{Lösung 1a}
+\begin{itemize}
+    \item rs123456 sieht nach additivem Effekt aus: pro Allel B ein Effekt
+    \item rs127890 sieht nach rezessivem Effekt aus: nur Unterschied zwischen AA/AB und BB
+\end{itemize}
+
+\textbf{Option 3} (komplexeres Modell):
+
+$$ y = \mu + \beta_1 \cdot AB + \beta_2 \cdot BB + \epsilon \text{;  mit AB, BB} \in \{0,1\}$$
+
+$H_0$: $G$ hat keinen Effekt auf $X$ ($\beta_1 = 0$ und $\beta_2 = 0$). 
+
+$H_1$: $G$ hat einen dominaten Effekt auf $X$ ($\beta_1 \neq 0$ und $\beta_1 \simeq \beta_2$)
+
+$H_2$: $G$ hat einen rezessiven Effekt auf $X$ ($\beta_1 = 0$ und $\beta_2 \neq 0$)
+
+$H_3$: $G$ hat einen additiven Effekt auf $X$ ($\beta_1 \neq 0$ und $\beta_1 \simeq 0.5 \cdot \beta_2$)
+
+\end{frame}
+
+\begin{frame}{Lösung 1a}
+\begin{itemize}
+    \item rs123456 sieht nach additivem Effekt aus: pro Allel B ein Effekt
+    \item rs127890 sieht nach rezessivem Effekt aus: nur Unterschied zwischen AA/AB und BB
+    \item aktuell: nur Analyse von zwei SNPs (= nicht genomweit)
+    \item GWAS: Teste \textbf{ALLE} SNPs auf Assoziation mit $X$ (führe die Regressionsanalyse $\sim$ 1 Mio. mal aus)
+    \item Multiples Testen $\rightarrow$ Korrektur der Signifikanzgrenze nötig ($\alpha=0.5 \rightarrow \alpha_{Bonferroni} = \frac{\alpha}{k} = 5\cdot 10^{-8}$, k=Anzahl getesteter SNPs)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Lösung 1a}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.85\textwidth]{_figures/Slides21_MultiplesTesten.jpg}
+\caption{Alphafehler-Kumulierung}
+\label{fig:MultiplesTesten}
+\end{center}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Zusatzfrage}
+    Warum $\sim$ 1 Mio. SNPs? 
+
+    \begin{itemize}
+        \item auf einem Array sind etwa 600.000 SNPs
+        \item in Referenzgenom sind $>80$ Mio. SNPs
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Zusatzfrage}
+    Warum $\sim$ 1 Mio. SNPs? 
+
+    \begin{itemize}
+        \item auf einem Array sind etwa 600.000 SNPs
+        \item in Referenzgenom sind $>80$ Mio. SNPs
+    \end{itemize}
+    
+    Aber
+    
+    \begin{itemize}
+        \item \textit{historisch}: man hat mit knapp 1 Mio die erste GWAS durchgeführt, der Grenzwert wurde beibehalten 
+        \item entspricht in etwa der Anzahl unabhängigen SNPs (paarweises LD $r^2<0.1$)
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Aufgabe 1b: Meta-Analyse}
+Um die Power zu maximieren sollen die Daten der vier Studien in einer Meta-Analyse kombiniert werden. 
+
+Welche Annahme wird hier häufig getroffen und wie kann diese geprüft werden?
+    
+\end{frame}
+
+\begin{frame}{Lösung 1b}
+
+    \textbf{Fixed Effect Model (FEM)}
+
+    \begin{itemize}
+        \item genetischer Effekt ist gleich (keine Heterogenität). 
+        \item in gemischten Modell: $y_{i,j} = \mu + b_i + \beta_j \cdot G + \epsilon_{i,j}$
+        \item studien-spezifischer Intercept (random) + fester SNP Effekt (fix = für alle Studien gleich)  
+    \end{itemize}
+
+    \textbf{Random Effect Model (REM)}
+
+    \begin{itemize}
+        \item genetischer Effekt ist in allen Studien unterschiedlich (Berücksichtigung der Heterogenität). 
+        \item in gemischten Modell: $y_{i,j} = \mu + b_{i1} + b_{ij2} \cdot G + \epsilon_{i,j}$
+        \item studien-spezifischer Intercept (random) + studien-spezifischer SNP Effekt (random) 
+    \end{itemize}
+
+    \textbf{Test}: Cochrans Q oder $I^2$ Statistik
+    
+\end{frame}
+
+\begin{frame}{Lösung 1b}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{_figures/Slides22_FEM_REM.jpg}
+\caption{Schema FEM (A) und REM (B). Jede Farbe stellt eine Studie dar. In Panel A hat jede Studie ihren eigenen Intercept, aber die gleiche Steigung (=SNP-Effekt). In Panel B hat jede Studie sowohl einen eigenen Intercept als auch eine eigene Steigung.}
+\label{fig:FEM_REM}
+\end{center}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Zusatzfrage}
+    Was ist das für ein Plot und wie ist dieser zu interpretieren? 
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.65\textwidth]{_figures/Slides22_ForestPlot.JPG}
+\label{fig:Forestplot}
+\end{center}
+\end{figure}
+    
+\end{frame}
+
+\begin{frame}{Zusatzfrage}
+    \textbf{Forest-Plot}: Zusammenfassung der Meta-Analyse (eines SNPs)
+
+    \begin{itemize}
+        \item Quadrate: Effekte der einzelnen Studien
+        \item Striche: 95\%-Konfidenzintervalle. 
+        \item Größe des Quadrats: Fallzahl/Gewicht
+        \item Rauten: Meta-Effektschätzer (FEM, REM).
+        \item SNP-Quali: $I^2$, info und MAF 
+    \end{itemize}
+
+    \textbf{Interpretation}: genomweit signifikant, aber hohe Heterogenität und schlechte info
+
+\end{frame}
+
+\begin{frame}{Zusatzfrage}
+    \textbf{Typischer SNP-Filterkriterien bei einer Meta-GWAS}: 
+    
+    \begin{itemize}
+        \item MAF (z.B. $mean(MAF)<0.01$)
+        \item MAC (minor allele count, Anzahl des Minorallels, z.B. $MAC<6$)
+        \item info-score (z.B. $min(info)<0.8$)
+        \item Heterogenität (z.B. $I^2<0.75$) 
+        \item Vollständigkeit zwischen den Studien bzw. mindestens zwei Studien (z.B. $k<2$)
+        \item Bonferroni-adjustierte P-Wert (z.B. $p< \frac{0.05}{1000000} = 5 \cdot 10^{-8}$)
+        \item LD (abh. von Ethnie, z.B. $r^2>0.1$)
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Aufgabe 1c: Stratifikationsbias}
+Nachdem alle Ihre Analysen abgeschlossen sind, meldet sich ein Kollege von Studie 2 bei Ihnen. Er teilt Ihnen mit, dass bei der Analyse leider vergessen wurde auf die Populationsstruktur zu korrigieren. 
+
+Was bedeutet das und welche Konsequenzen hat das für Ihre Analyse? 
+
+\end{frame}
+
+\begin{frame}{Lösung 1c}
+
+\textbf{Stratifikationsbias}: Durch die \textbf{gemeinsame Analyse} von Personen \textbf{unterschiedlicher genetischer Herkunft} bei gleichzeitigem Vorliegen \textbf{nichtgenetisch bedingter Unterschiede} zwischen den Personengruppen können sich \textbf{falsche Schätzer genetischer Effekte} ergeben. 
+
+\textbf{Mögliche Maßnahmen}:
+
+\begin{itemize}
+    \item Analyse der Populationsstruktur (Structure, PCA, MDS)
+    \item Korrektur auf Hauptkomponenten
+    \item Berücksichtigung der Verwandtschaftsstruktur in genetischen Daten 
+    \item Genomic Control 
+    \item Genetische Outlier weglassen
+\end{itemize}
+
+$\Rightarrow$ Option 1: Kollege rechnet die GWAS in seiner Studie nochmal neu, unter Berücksichtigung der Populationsstruktur
+
+$\Rightarrow$ Option 2: Sie führen Genomic Control für die Summary Statistics der Studie 2 durch, und wiederholen dann die Meta-Analyse
+
+\end{frame}
+
+\begin{frame}{Aufgabe 1d: Heritabilität}
+In Ihrer finalen Analyse erklärt der SNP 4\% der Varianz von X. Die Gesamt-Heritabilität von X liegt jedoch laut Literatur bei 40\%.
+
+Definieren Sie den Begriff Heritabilität und erklären Sie den Unterschied zwischen den Werten!
+\end{frame}
+
+\begin{frame}{Lösung 1d}
+
+\textbf{Heritabilität}: Anteil der Varianz eines Merkmals, der durch die Genetik erklärt wird. 
+
+Beantwortet in wie fern Gene den Unterschied (Varianz) einer Eigenschaft erklären, \textbf{NICHT} welche Gene die Eigenschaft beeinflussen. 
+
+$$ h^2 = \frac{Var(G)}{Var(Merkmal)} = \frac{Var(G)}{Var(G) + Var(U) + 2 \cdot Cov(G, U)}$$
+
+\textbf{Methoden}
+
+\begin{itemize}
+    \item Verwandtschaftstudien bzw Zwillingsstudien:
+    \begin{itemize}
+        \item Falconers Formel $h^2=2 \cdot (r(MZ) - r(DZ))$ 
+        \item Vergleich der Merkmalskonkordanz zwischen monozygoten (MZ) und dizygoten (DZ) Zwilligen
+    \end{itemize}
+    \item Querschnittsstudien von unverwandten Personen
+    \begin{itemize}
+        \item Genetik-Daten vorhanden: GREML (z.B. in GCTA implementiert)
+        \item Nur Summary Statistics vorhanden: LD Score Regression (python-basiert, bislang nur für weiße Europäer/Amerikaner etabliert)
+    \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Lösung 1d}
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.85\textwidth]{_figures/Slides24_MissingHeritab.jpg}
+\label{fig:Heritab}
+\end{center}
+\end{figure}
+
+Die 40\% laut Literatur kommen vermutlich aus einer Zwillingsstudie (genomweit, $h^2$).
+
+Die 4\% kommen von einem einzelnen SNP (rs123456, $h_{sSNP}^2$)
+
+\end{frame}
+
+\section{Exercise 2}
+
+\begin{frame}{Aufgabe 2 - Ausgangslage}
+\begin{itemize}
+    \item Summary Statistics für $X$ (s. Aufgabe 1)
+    \item Hits in Genregion $ABC$
+    \item Kollege
+    \begin{itemize}
+        \item Genomweite Analyse für Krankheit $Y$ (in unabhängige Studien)
+        \item ebenfalls Hits in Genregion $ABC$
+    \end{itemize}
+    \item Ihre Rolle
+    \begin{itemize}
+        \item Verantwortlich für Analysen in Studie 1
+        \item Interessiert an Zusammenhang zwischen $ABC$ und $X$
+        \item Wollen auf kausale Beziehung zwischen Risikofaktor $X$ und Krankheit $Y$ testen
+    \end{itemize}
+\end{itemize} 
+\end{frame}
+
+\begin{frame}{Aufgabe 2a: Grundlagen Mendelischer Randomisierung}
+Was ist die Idee der MR und welche drei Bedingungen müssen dafür gelten?
+\end{frame}
+
+\begin{frame}{Lösung 2a}
+
+\textbf{Ziel}: Detektion eines kausalen Effekts von $X$ auf $Y$
+
+\textbf{Randomisiert}: elterliche Allele zufällig bei Meiose + zufällige Kombination von paternalen und maternalen Allelen
+
+\textbf{Bedingungen}: 
+
+($IVs$ = Instrumentale Variablen, die in der MR genutzt werden)
+
+\begin{itemize}
+    \item $IVs$ sind mit X assoziiert 
+    \begin{itemize}
+        \item Das haben Sie in Ihrer GWAS gezeigt
+    \end{itemize}
+    \item $IVs$ sind unabhängig von möglichen Confoundern $U$
+    \begin{itemize}
+        \item In der Regel nur plausibilisierbar
+        \item Abgleich mit Datenbanken wie dem GWAS Katalog (welche anderen Phänotypen sind für diese SNPs)
+    \end{itemize}
+    \item $IVs$ sind unabhängig von $Y$ bis auf seinen Effekt auf $X$
+        \begin{itemize}
+        \item In der Regel nur plausibilisierbar
+        \item Der Effekt, den Ihr Kollege beobachtet, sollte also von dem Effekt kommen, den Sie schon in Ihrer GWAS gesehen haben.
+    \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Lösung 2a}
+
+\textbf{Idee MR}: der durch die $IVs$ erklärte Effekt von $X$ auf $Y$ ist ein kausaler Schätzer. Modell: 
+
+$$Y \sim \beta_{IV} \cdot X = \beta_{IV}(\beta_X \cdot G) = \beta_Y \cdot G$$
+
+$$ \hat{\beta}_{IV} = \frac{\beta_Y}{\beta_X}$$
+
+Den Standardfehler kann man mittels Jackknife oder Delta-Methode abschätzen. 
+
+\textbf{Unterschied zu Randomisierter Studie}: 
+
+\begin{itemize}
+    \item Statt Einteilung in Medikament vs Placebo Einteilung anhand der Risiko-Allele. 
+    \item Lebenslange Wirkung in der Genetik, temporäre Wirkung eines Medikaments
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Aufgabe 2b: DAGs}
+Erläutern Sie das jeweilige Szenario!
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.85\textwidth]{_figures/Exercise22_DAGs.jpg}
+\label{fig:DAGs}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Lösung 2b - Panel A}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.85\textwidth]{_figures/Exercise22_DAGs.jpg}
+\label{fig:DAGsA}
+\end{center}
+\end{figure}
+
+$G$ hat einen Effekt auf $X$, und $X$ hat einen kausalen Effekt auf $Y$. Der SNP-Effekt auf $Y$ kommt nur über die kausale Struktur zustande. 
+
+        \begin{itemize}
+            \item Dies ist ein typischer, \textbf{valider} DAG für eine MR
+            \item Ideale Situation
+            \item Die MR würde zu einem wahr-postiven Ergebnis führen!
+        \end{itemize}        
+\end{frame}
+
+\begin{frame}{Lösung 2b - Panel B}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.85\textwidth]{_figures/Exercise22_DAGs.jpg}
+\label{fig:DAGsB}
+\end{center}
+\end{figure}
+
+Der SNP $G$ hat einen pleiotropen Effekt, d.h. er beeinflusst sowohl $X$ als auch $Y$ unabhängig voneinander; es besteht keine kausale Beziehung zwischen $X$ und $Y$. 
+
+        \begin{itemize}
+            \item Das ist ein \textbf{invalider} DAG für eine MR! 
+            \item Horizontale Pleiotropie
+            \item Die MR würde zu einem falsch-postiven Ergebnis führen!
+        \end{itemize} 
+\end{frame}
+
+\begin{frame}{Lösung 2b - Panel C}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.85\textwidth]{_figures/Exercise22_DAGs.jpg}
+\label{fig:DAGsC}
+\end{center}
+\end{figure}
+
+Zwei unterschiedliche SNPs, $G_1$ und $G_2$, haben einen Effekt auf $X$ bzw $Y$, wobei keine kausale Beziehung zwischen $X$ und $Y$ besteht. Die beiden SNPs sind jedoch in LD miteinander. 
+
+\begin{itemize}
+    \item Das ist ein \textbf{invalider} DAG für eine MR! 
+    \item Counfounding durch LD
+    \item Die MR würde zu einem falsch-postiven Ergebnis führen!
+\end{itemize} 
+
+$\Rightarrow$ es reicht also nicht aus den besten SNP auf Pleiotropie zu prüfen, auch alle Varianten in LD müssen berücksichtigt werden!
+\end{frame}
+
+\begin{frame}{Aufgabe 2c: Grundlagen Colokalisierung}
+Ihr Kollege schlägt als Sensitivitätsanalyse der MR einen Test auf Colokalisierung vor. 
+
+Was ist unterdiesem Begriff zu verstehen und wie unterscheidet sich die Analyse von der MR?
+
+\end{frame}
+
+\begin{frame}{Lösung 2c}
+\textbf{Colokalisierung}: Vergleich der genetischen Assoziationen zweier Phänotypen am gleichen genetischen Lokus
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=1\textwidth]{_figures/Slides25_Coloc.JPG}
+\label{fig:Coloc}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Lösung 2c}
+
+\begin{itemize}
+    \item unabhängig von MR
+    \item agnostisch zu Effektrichtung bzw. kausale Beziehung
+    \item in drug-targeted Analysen: Auswahl der Genregion anhand eines Risikofaktors, der von dem Medikament beeinflusst wird. Wir geben der Analyse daher eine Richtung vor 
+    \item $\rightarrow$ Colokalisierung kann helfen die \textbf{invaliden DAGs} zu erkennen!
+    \begin{itemize}
+        \item Panel A: hohe PP für gemeinsames Signal  
+        \item Panel B: hohe PP für gemeinsames Signal (falsch-positiv, aber im Kontext der Medikamenten-Entwicklung selten!)
+        \item Panel C: hohe PP für zwei unabhängige Signale 
+    \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\section{Summary}
+
+\begin{frame}{Zusammenfassung}
+
+\begin{itemize}
+    \item Typische GWAS Regression
+    \begin{itemize}
+        \item Annahme additiver SNP-Effekt
+    \end{itemize}
+    \item Typische Meta-Analyse
+    \begin{itemize}
+        \item Fixed Effect Model (FEM) unter der Annahme, dass der SNP-Effekt in allen Studien gleich ist (keine Heterogenität)
+    \end{itemize}
+    \item Stratifikationsbias
+    \begin{itemize}
+        \item Inflations der Teststatistiken aufgrund fehlender Korrektur auf Populationsstruktur
+    \end{itemize}
+    \item Heritabilität
+    \begin{itemize}
+        \item Varianz die durch die Genetik erklärt wird
+    \end{itemize}
+    \item Mendelische Randomisierung
+    \begin{itemize}
+        \item Detektion eines kausalen Effekts anhand der genetisch-vorhergesagten Werte von $X$ und $Y$
+    \end{itemize}
+    \item Colokalisierung
+    \begin{itemize}
+        \item Vergleich der genetischen Assoziationen zweier Phänotypen $X$ und $Y$ am gleichen genetischen Lokus
+    \end{itemize}   
+\end{itemize}
+    
+\end{frame}
+
+\end{document}

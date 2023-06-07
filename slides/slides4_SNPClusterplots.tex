@@ -1,0 +1,117 @@
+\documentclass{beamer}
+\usetheme{Boadilla}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{ngerman}
+\usepackage{hyperref}
+
+\title{Funktionelle Genomanalysen 2023}
+\subtitle{Asynchrone Übung zu SNP-Clusterplots}
+\author{Dr. Janne Pott}
+\date{09.-11. Juni 2023}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Allgemeines}
+    \begin{itemize}
+        \item Array-abhängig werden die verschiedenen Allele mit Labels versehen (farbcodiert)
+        \item Pro Sample und SNP werden die Intensitäten beider Labels bestimmt
+        \item Jeder Plot ist SNP-spezifisch
+        \item Jeder Punkt im Plot entspricht einem Sample
+        \item X-Achse ist die log-transformierte Ratio der Intensitäten: $log_2(A/B)$
+        \item Y-Achse ist das log-transformierte Produkt der Intesitäten: $0.5 \cdot log_2(AB)$
+        \item AB Cluster sollte über den anderen beiden liegen, weil hier doppelte Intesität gemessen
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Clusterdefinition im Idealfall}
+    \begin{itemize}
+        \item Genotyp AA
+        \begin{itemize}
+            \item hohe A Intesität, niedrige B Intesität 
+            \item Ratio ist größer als 1
+            \item Log-Transformierte Ratio ist größer als 0
+            \item \textbf{blaues Cluster} 
+        \end{itemize}
+        \item Genotyp BB
+        \begin{itemize}
+            \item hohe B Intesität, niedrige A Intesität 
+            \item Ratio ist kleiner als 1
+            \item Log-Transformierte Ratio ist kleiner als 0
+            \item \textbf{grünes Cluster} 
+        \end{itemize}
+        \item Genotyp AB
+        \begin{itemize}
+            \item mittlere A Intesität, mittlere B Intesität 
+            \item Ratio ist in etwa 1
+            \item Log-Transformierte Ratio ist in etwa 0
+            \item \textbf{gelbes Cluster} 
+        \end{itemize}
+    \end{itemize}
+    
+\end{frame}
+\begin{frame}{SNP Kriterien}
+\begin{table}[]
+    \centering
+    \begin{tabular}{l|l|r}
+    Kriterium & Bedeutung & Threshold \\   
+    \hline
+    Call Rate & 1 – Anteil missings            &  $<97\%$  \\
+    p(HWE)    & p-Wert des exakten Fisher Test & $<1x10^{-6}$ \\
+    p(PA)     & p-Wert des Chi-Quadrat Test    & $<1x10^{-7}$  \\
+              &  der AF pro Platte             & \\
+    MAC       & Minor Allele Count             & $<2$ \\
+    \hline
+    FLD       & Minimaler Abstand zwischen den & $<3.6$  \\
+              & Cluster (bzgl. X-Achse)        & \\
+    HetSO     & Abstand des AB-Clusters zu AA  & $<-0.1$    \\
+              &  bzw. BB (bzgl. Y-Achse)       & \\
+    HomRO     &  Verteilung der Cluster        & 3 Cluster: $<-0.9$ \\
+              &  (bzgl. 0 der X-Achse)         & 2 Cluster: $<0.3$  \\
+              &                                & 1 Cluster: $<0.6$  
+    \end{tabular}
+    \caption{Übersicht von relevanten SNP Kriterien. Die ersten vier sind Array-unspezifisch, die letzten drei sind spezifisch für Affymetrix Arrays. Es gilt: SNP filtern, wenn Wert kleiner als Threshold ist}
+    \label{tab:my_label}
+\end{table}
+\end{frame}
+
+\begin{frame}{Plattform-unspezifische Kriterien}
+    \begin{itemize}
+        \item \textbf{Call Rate}: s. HWE Aufgabe in erster Übung - es konnten nicht für alle Samples die Genotypen bestimmt werden
+        \item \textbf{HWE}: s. HWE Aufgabe in erster Übung - in der Übung zu $\alpha = 0.5$ getestet, jetzt auf multiples Testen korrigiert
+        \item \textbf{PA}: Plattenassoziation, Test ob es Batcheffekte pro Platte gibt. Ebenfalls auf multiples Testen korrigiert
+        \item \textbf{MAC}: wenn das selterne Allel nicht mindestens 2 mal vorkommt, dann ist das quasi kein SNP mehr, weil fast alle homozygot sind und nur eine Person heterozygot. Damit kann man nicht vernünftig rechnen
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{FLD: Fisher’s Linear Discriminant}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\textwidth]{_figures/Slides4_FLD.JPG}
+    \caption{Links FLD ok, rechts FLD kleiner als 3.6 (zwischen AB und AA) $\rightarrow$ SNP muss gefiltert werden}
+    \label{fig:FLD}
+\end{figure}
+\end{frame}
+
+\begin{frame}{HetSO: Heterozygous Strength Offset}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\textwidth]{_figures/Slides4_HetSO.JPG}
+    \caption{Links HetSO ok, rechts HetSO kleiner als -0.1 (Mittelpunkt AB deutlich unter der Verbindungslinie zwischen AA und BB) $\rightarrow$ SNP muss gefiltert werden}
+    \label{fig:HetSO}
+\end{figure}
+\end{frame}
+
+\begin{frame}{HomRO: Homozygote Ratio Offset}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\textwidth]{_figures/Slides4_HomRO.JPG}
+    \caption{Links HomRO ok, rechts HomRO kleiner als -0.9 (BB Cluster deutlich im positiven Bereich der x-Achse) $\rightarrow$ SNP muss gefiltert werden}
+    \label{fig:HomRO}
+\end{figure}
+\end{frame}
+
+\end{document}
