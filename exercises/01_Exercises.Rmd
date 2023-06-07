@@ -1,0 +1,123 @@
+---
+title: "Funktionelle Genomanalysen 2023 (09-CRT-A006)"
+subtitle: "Übung 1: Grundlagen der genetischen Statistik" 
+author: "Dr. Janne Pott"
+date: "09.-11. Juni 2023"
+output: pdf_document
+---
+
+**Allgemeine Hinweise:**
+
+* Die Aufgaben werden in der Übung gemeinsam bearbeitet. 
+* Zur Lösung von manchen Aufgaben wird ein Taschenrechner o.ä. benötigt. 
+* Am Ende des Moduls wird eine Musterlösung bereitgestellt. 
+
+```{r setup1, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE,results = FALSE}
+library(knitr)
+library(data.table)
+setDTthreads(1)
+library(ggplot2)
+
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+
+# Aufgabe 1: Crossing-over & Linkage-Disequilibrium
+
+a) Definieren Sie anhand der Abbildung \ref{fig:CrossingOver} den Begriff **Crossing-over**.
+
+b) Erläutern Sie den Zusammenhang zwischen der **Crossing-over** und **LD-Struktur** des Genoms.
+
+c) Betrachten Sie Tabelle \ref{tab:4FT}. Bestimmen Sie die **Randverteilungen** und berechnen Sie das **LD-Maß $r^2$**! Formel: $$r^2 = \frac{(p_{00}p_{11} - p_{01}p_{10})^2}{p_{0.}p_{.0}p_{1.}p_{.1}}$$
+
+d) Interpretieren Sie das Ergebnis! Was sind die **häufigen Haplotypen**? Was bedeutet dies für ein doppelt heterozygotes Individuum?
+
+e) Würden Sie zwischen SNP 1 und SNP 3 ein höheres oder niedrigeres $r^2$ erwarten? Begründen Sie Ihre Entscheidung!
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=0.6\textwidth]{../figures/Exercise11_CrossingOver_mod.jpg}
+\caption{Crossing-over eines Chromosoms. A) Elektronenmikroskopische Aufnahme. B) Schematische Darstellung. Die schwarz gestrichelten Linien kennzeichnen ein Corssing-over, die blauen Linien die grobe Position von SNPs. Insgesamt sind 4 Segmente (A-D) eingetragen. Die etwas dünneren Stellen im Segment C kennzeichnen das Zentromer. Modifiziert aus Alberts et al., Molecular Biology of the Cell, 2008}
+\label{fig:CrossingOver}
+\end{center}
+\end{figure}
+
+\begin{table}[ht]
+\caption{4-Felder-Tafel der beiden biallelischen SNPs: SNP 1 (Allele A1/B1) und SNP 2 (Allele A2/B2) aus Daten von 500 gemessenen diploiden Individuen} \label{tab:4FT} 
+\begin{center}
+\begin{tabular}[h]{c|cc}
+ & SNP 1 - Allel A1 & SNP 1 - Allel B1 \\
+\hline
+SNP 2 - Allel A2 & 570 & 15 \\
+SNP 2 - Allel B2 & 25 & 390 \\
+\end{tabular}
+\end{center}
+\end{table}
+
+
+
+\newpage
+
+# Aufgabe 2: Hardy-Weinberg-Gleichgewicht
+
+Für den biallelischen SNP 1 mit Allelen A und B wird folgende Genotypverteilung beobachtet:
+
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}[h]{ccccc}
+Genotyp & AA & AB & BB & Missing \\
+\hline
+Häufigkeit & 824 & 1326 & 463 & 87\\
+\end{tabular}
+\end{center}
+\caption{Genotypverteilung eines gemessenen SNPs mit Allelen A/B in n=2700 diploiden Individuen. Missing bedeutet, dass kein Genotyp vom Algorithmus bestimmt werden konnte.} \label{tab:HWE1} 
+\end{table}
+
+a) Welche Modellannahmen werden Hardy-Weinberg-Gleichgewicht (HWE) getroffen (Stichwort **ideale Population**)?
+
+b) Betrachten Sie Tabelle \ref{tab:HWE1}. Bestimmen Sie auf drei Nachkommastellen genau die 
+    + die **Callrate** des SNPs,
+    + die **Allelfrequenzen** für A und B, und 
+    + die **erwartete Genotypverteilung** im HWE!
+
+c) Zusatz: Testen Sie auf HWE mit 5% Irrtumswahrscheinlichkeit. Stellen Sie dazu die **Nullhypothese** auf. Berechnen Sie die **Teststatistik** für diese und interpretieren Sie das Ergebnis (s. Tabelle \ref{tab:HWE2} für die Quantile). Formel: $$\sum_i\frac{(O_i - E_i)^2}{E_i}, i\in {AA, AB, BB}$$
+
+\begin{table}[ht]
+\caption{Wichtige Quantile der $\chi^2$-Verteilung nach Freiheitsgraden df und Wahrscheinlichkeit $\alpha$} \label{tab:HWE2} 
+\begin{center}
+\begin{tabular}[h]{c|c|c|c|c|c|c}
+ & $\alpha$=0.99 & $\alpha$=0.975 & $\alpha$=0.95 & $\alpha$=0.05 & $\alpha$=0.025 & $\alpha$=0.01 \\
+\hline
+df=1 & 0.00016 & 0.00098 & 0.0039 & 3.841 & 5.024 & 6.635 \\
+\hline
+df=2 & 0.020 & 0.051 & 0.103 & 5.991 & 7.378 & 9.210 \\
+\hline
+df=3 & 0.115 & 0.216 & 0.352 & 7.815 & 9.348 & 11.340 \\
+\hline
+df=4 & 0.297 & 0.484 & 0.711 & 9.488 & 11.140 & 13.280 \\
+\hline
+df=5 & 0.554 & 0.831 & 1.150 & 11.070 & 12.830 & 15.090 \\
+\end{tabular}
+\end{center}
+\end{table}
+
+
+# Aufgabe 3: Genetische Modelle & Stammbäume
+
+a) Definieren Sie die Begriffe **dominant**, **rezessiv** und **Penetranz**. 
+
+b) Betrachten Sie die drei Stammbäume in Abbildung \ref{fig:Stammbaum} und geben Sie folgendes an:
+    + eine Legende,
+    + die Träger/in (soweit möglich),
+    + wahrscheinlichstes Segregationsmuster (mit Begründung)
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=1\textwidth]{../figures/Exercise13_FamilyTrees.jpg}
+\caption{Drei Stammbäume. Frei aus dem Internet}
+\label{fig:Stammbaum}
+\end{center}
+\end{figure}
+
+

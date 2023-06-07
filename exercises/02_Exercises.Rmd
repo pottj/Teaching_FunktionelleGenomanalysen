@@ -1,0 +1,102 @@
+---
+title: "Funktionelle Genomanalysen 2023 (09-CRT-A006)"
+subtitle: "Übung 2: GWAS & Sekundäranalysen" 
+author: "Dr. Janne Pott"
+date: "09.-11. Juni 2023"
+output: pdf_document
+---
+
+**Allgemeine Hinweise:**
+
+* Die Aufgaben werden in der Übung gemeinsam bearbeitet. 
+* Zur Lösung von manchen Aufgaben wird ein Taschenrechner o.ä. benötigt. 
+* Am Ende des Moduls wird eine Musterlösung bereitgestellt. 
+
+```{r setup1, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE,results = FALSE}
+# r_on_server = T
+# if(r_on_server==T) basicpath = "/net/ifs1/san_projekte/projekte/genstat/"  else basicpath =  "J:/genstat/"
+# if(r_on_server==T) .libPaths("/net/ifs1/san_projekte/projekte/genstat/07_programme/rpackages/angmar//") else .libPaths("C:/userprograms/downloaded_Rpackages")
+# .libPaths()
+
+#pathwd = paste0(basicpath, "/13_lehre/SS23_MSC/exercises_janne/01_GeneticalStatistics/")
+pathwd = "~/03_teaching/2306_MScClinicalResearch/02_SecondaryAnalyses/"
+setwd(pathwd)
+
+# Hier sollen alle notwendigen Pakete stehen die im Laufe der Uebung genutzt werden
+library(knitr)
+library(data.table)
+setDTthreads(1)
+library(ggplot2)
+
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+
+# Aufgabe 1: Regressionsmodelle
+
+Nehmen Sie an, die autosomalen biallelischen SNPs **rs123456** und **rs127890** und ein normalverteilter Phänotyp **$X$** wurden in vier unabhängigen Studien gemessen ($n_1 = 1911$, $n_2 = 3350$, $n_3 = 1933$, $n_4 = 4964$). Sie sind verantwortlich für Studie 1, und erforschen den Zusammenhang zwischen Gen $ABC$ und $X$, wobei die SNPs in der Promoterregion des Gens liegen. 
+
+a) Betrachten Sie die unten gezeigten Boxplots der SNP Genotypen und $X$ aus Studie 1 (Abb. \ref{fig:figure1}). Überlegen Sie sich geeignete Regressionsmodelle, mit dem Sie testen können, ob rs123456 oder rs127890 einen Effekt auf $X$ haben. Welche Hypothese wird dabei getestet? Kann damit zwischen dominant und rezessiv unterschieden werden?
+
+b) Um die Power zu maximieren sollen die Daten der vier Studien in einer Meta-Analyse kombiniert werden. Welche Annahme wird hier häufig getroffen und wie kann diese geprüft werden? 
+
+c) Nachdem alle Ihre Analysen abgeschlossen sind, meldet sich ein Kollege von Studie 2 bei Ihnen. Er teilt Ihnen mit, dass bei der Analyse leider vergessen wurde auf die Populationsstruktur zu korrigieren. Was bedeutet das und welche Konsequenzen hat das für Ihre Analyse? (Stichwort \textbf{Stratifikationsbias})
+
+d) In Ihrer finalen Analyse erklärt der SNP 4\% der Varianz von $X$. Die Gesamt-Heritabilität von $X$ liegt jedoch laut Literatur bei 40\%. Definieren Sie den Begriff Heritabilität und erklären Sie den Unterschied zwischen den Werten!
+
+```{r figure1, echo=F,eval=T,out.width = '80%',fig.align = 'center',fig.cap="\\label{fig:figures}Boxplots per Genotypen pro SNP."}
+tab = data.table(SNP = c(rep("AA",1200),rep("AB",600),rep("BB",300)),
+                 SNP_add = c(rep(0,1200),rep(1,600),rep(2,300)),
+                 SNP_rez = c(rep(0,1200),rep(0,600),rep(1,300)),
+                 SNP_dom = c(rep(0,1200),rep(1,600),rep(1,300)),
+                 SNP_het = c(rep(0,1200),rep(1,600),rep(0,300)))
+n = dim(tab)[1]
+tab[,pheno1 := 5 + 0.6 * SNP_add + rnorm(n,sd=1)]
+tab[,pheno2 := 5 + 0.6 * SNP_rez + rnorm(n,sd=1)]
+tab[,pheno3 := 5 + 0.6 * SNP_dom + rnorm(n,sd=1)]
+tab[,pheno4 := 5 + rnorm(n,sd=1)]
+tab[,pheno5 := 5 + 0.6 * SNP_het + rnorm(n,sd=1)]
+
+tab2 = melt(data = tab,
+            id.vars = "SNP",
+            measure.vars = c("pheno1","pheno2","pheno3","pheno4","pheno5"))
+
+tab3 = copy(tab2)
+tab3 = tab2[variable=="pheno1" | variable =="pheno2"]
+tab3[variable == "pheno1", variable := "rs123456"]
+tab3[variable == "pheno2", variable := "rs127890"]
+
+ggplot(tab3, aes(x=SNP, y=value,fill=SNP)) + 
+  facet_wrap(facets = "variable") +
+  geom_boxplot(notch=TRUE)+
+  theme_bw(base_size = 10)+
+  theme(axis.title.x = element_text(size=12,face="bold"),
+        axis.title.y = element_text(size=12,face="bold"),
+        axis.text = element_text(size=12,face="bold"))+
+  labs(x="SNP Genotyp", 
+       y = "Phänotyp X")+
+  guides(fill="none",color="none")
+
+```
+
+\newpage
+
+# Aufgabe 2: Colokalisierung und Mendelische Randomisierung
+
+Ein Kollege forscht ebenfalls am Gen $ABC$, aber im Bezug auf die Krankheit $Y$, die ebenfalls mit dieser Region assoziiert ist. Sie möchten nun eine **Mendelische Randomisierung (MR)** planen um auf einen kausalen Effekt von $X$ auf $Y$ zu testen. 
+
+a) Was ist die Idee der MR und welche drei Bedingungen müssen dafür gelten?
+
+b) Betrachten Sie die drei gerichteten azyklischen Graphen in Abbildung \ref{fig:DAGs} (DAGs, *directed acyclic graphs*). Erläutern Sie das jeweilige Szenario!
+
+c) Ihr Kollege schlägt als Sensitivitätsanalyse der MR einen Test auf Colokalisierung vor. Was ist unter diesem Begriff zu verstehen und wie unterscheidet sich die Analyse von der MR?
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{../figures/Exercise22_DAGs.jpg}
+\caption{Drei DAGs}
+\label{fig:DAGs}
+\end{center}
+\end{figure}
+
