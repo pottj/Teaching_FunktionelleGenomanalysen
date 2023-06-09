@@ -12,32 +12,32 @@ Dr. Janne Pott
   - <a href="#visualisierung" id="toc-visualisierung">Visualisierung</a>
   - <a href="#harmonisierung" id="toc-harmonisierung">Harmonisierung</a>
   - <a href="#coloc" id="toc-coloc">Coloc</a>
-  - <a href="#sensitivitaet" id="toc-sensitivitaet">Sensitivitaet</a>
+  - <a href="#sensitivität" id="toc-sensitivität">Sensitivität</a>
 - <a href="#sessioninfo" id="toc-sessioninfo">SessionInfo</a>
 
 # Allgemeine Informationen
 
-**Ziel**: Das Ziel dieses Tutoriums ist es, fuer drei Phaenotypen eine
-Colocalisation-Analyse durchzufuehren, um die praktische Anwendung und
+**Ziel**: Das Ziel dieses Tutoriums ist es, für drei Phänotypen eine
+Colocalisation-Analyse durchzuführen, um die praktische Anwendung und
 Interpretation der Ergebnisse dieser Methode aufzuzeigen.
 
 **Daten**: Wir werden in diesem Beispiel Teilmengen von bereits
 publizierten GWAS verwenden
 
 - LDLC Summary Statistics von [Surakka, I. et al. Nat Genet
-  (2015).](https://www.nature.com/articles/ng.3300), Link to data:
-  <http://diagram-consortium.org/2015_ENGAGE_1KG/>
+  (2015).](https://www.nature.com/articles/ng.3300), [Link to complete
+  data](http://diagram-consortium.org/2015_ENGAGE_1KG/)
 - CAD Summary Statistics von [Nikpay, M. et al. Nat Genet
-  (2015).](https://www.nature.com/articles/ng.3396), Link to data:
-  <http://www.cardiogramplusc4d.org/data-downloads/>
+  (2015).](https://www.nature.com/articles/ng.3396), [Link to complete
+  data](http://www.cardiogramplusc4d.org/data-downloads/)
 - Sitosterol Summary Statistics von [Scholz, M. et al. Nat Commun
-  (2022).](https://www.nature.com/articles/s41467-021-27706-6), Link to
-  data: <https://zenodo.org/record/5607613>
+  (2022).](https://www.nature.com/articles/s41467-021-27706-6), [Link to
+  complete data](https://zenodo.org/record/5607613)
 
 **Hinweis**: Das Sitosterol-Paper kennen Sie bereits aus der Vorlesung.
-Wir werden hier aehnliche Analysen durchfuehren, aber nicht die exakt
+Wir werden hier ähnliche Analysen durchführen, aber nicht die exakt
 gleichen, da wir *nur* die Summary Statistics und nicht die
-konditionierten Statistiken verwenden werden. Zusaetzlich wird nur der
+konditionierten Statistiken verwenden werden. Zusätzlich wird nur der
 Lokus auf Chromosom 2 betrachtet. Es handelt sich also nur um ein
 Minimal-Beispiel, wir werden nicht die exakten Werte der Publikation
 replizieren.
@@ -45,7 +45,7 @@ replizieren.
 ## Initialisierung
 
 Zuerst laden wir alle notwendigen Pakete. Es handelt sich hierbei um
-**alle** Pakete fuer beide Tutorials!
+**alle** Pakete für beide Tutorials!
 
 ``` r
 # load required packages
@@ -77,15 +77,15 @@ library(MendelianRandomization)
 ## Daten einlesen
 
 Im Moodle-Kurs finden Sie eine .RData Datei, die bereits alle
-notwendigen Tabellen enthaelt und einfach in R eingelesen werden kann.
-Sie enthaelt die folgenden *data.tables*:
+notwendigen Tabellen enthält und einfach in R eingelesen werden kann.
+Sie enthält die folgenden *data.tables*:
 
 - tab_LDL
 - tab_CAD
 - tab_SIT
 
-Das R-Paket *data.table* ist sehr performant fuer das handling von
-grossen Daten in R. Weitere Infos dazu finden Sie unter
+Das R-Paket *data.table* ist sehr performant für das handling von großen
+Daten in R. Weitere Infos dazu finden Sie unter
 <https://r-datatable.com>.
 
 ``` r
@@ -153,9 +153,9 @@ tab_SIT[pval_SIT == min(pval_SIT),]
     ##        pval_SIT N_SIT
     ## 1: 1.48146e-151  9755
 
-Die Datensaetze sind jeweils schon eingeschraenkt auf Chromosom 2 und
-die Region um best-assoziierten SNP von SIT herum (Basenposition
-44072576 +/- 1 Mio. Basen).
+Die Datensätze sind jeweils schon eingeschränkt auf Chromosom 2 und die
+Region um best-assoziierten SNP von SIT herum (Basenposition 44072576
++/- 1 Mio. Basen).
 
 # Colocalisation-Analyse
 
@@ -165,8 +165,8 @@ Weitere Inforamtionen zum *coloc* R-Paket finden Sie unter
 ## Visualisierung
 
 Es ist immer gut, die Daten auch zu visualisieren. Deswegen werden wir
-zunaechst drei Plots erzeugen, um die lokale Assoziation per Phaenotyp
-zu sehen und zu pruefen, ob eine Coloc-Analyse hier sinnvoll ist.
+zunächst drei Plots erzeugen, um die lokale Assoziation per Phänotyp zu
+sehen und zu prüfen, ob eine Coloc-Analyse hier sinnvoll ist.
 
 ``` r
 p1 <- ggplot(tab_LDL, aes(x = pos, y = -log10(pval_LDL))) +
@@ -204,7 +204,7 @@ ggpubr::ggarrange(p1, p2,p3,
 
 ![](tutorial1_coloc_files/figure-gfm/plots-1.png)<!-- -->
 
-Es gibt also fuer alle drei Phaenotypen ein Signal, aber wir koennen die
+Es gibt also für alle drei Phänotypen ein Signal, aber wir können die
 Region auch verkleinern, da die Assoziationen am Rand allesamt nicht
 genomweit signifkant sind.
 
@@ -250,9 +250,9 @@ ggpubr::ggarrange(p1, p2,p3,
 
 ## Harmonisierung
 
-Der Vergleich kann nur mit SNPs durchgefuerht werden, die fuer beide bzw
-alle drei Phaenotypen vorhanden sind. Daher werden nun die drei Tabellen
-zusammengefuegt.
+Der Vergleich kann nur mit SNPs durchgefürht werden, die für beide bzw
+alle drei Phänotypen vorhanden sind. Daher werden nun die drei Tabellen
+zusammengefügt.
 
 ``` r
 tab_LDL[,chr := 2]
@@ -271,9 +271,9 @@ tab = Reduce(function(x, y) plyr::join(x, y), list(tab_dummy, tab_CAD, tab_LDL, 
 tab = tab[complete.cases(tab),]
 ```
 
-Die Richtung des Effekts ist fuer die Colokalisierung nicht relevant.
+Die Richtung des Effekts ist für die Colokalisierung nicht relevant.
 Daher muss nicht zwingend auf das gleiche Effektallel gedreht werden.
-Aber es ist sehr ratsam zumindest zu pruefen, dass die gleichen zwei
+Aber es ist sehr ratsam zumindest zu prüfen, dass die gleichen zwei
 Allele getestet wurden. In diesem Tutorial werden ich die Allele jetzt
 angleichen.
 
@@ -337,13 +337,13 @@ tab[,MAF_SIT := ifelse(EAF_SIT < 0.5, EAF_SIT, 1 - EAF_SIT)]
 tab[,MAF_LDL := MAF_SIT]
 ```
 
-**Hinweis**: Fuer die LDL Daten waren in den Summary Statistics keine
-EAF Information gegeben. Daher habe ich mich hier entschieden, die
-gleichen Frequenzen wie bei Sitosterol anzunehmen. Alternativ haette man
-auch die Frequenzen aus dem Referenzgenom verwenden koennen.
+**Hinweis**: Für die LDL Daten waren in den Summary Statistics keine EAF
+Information gegeben. Daher habe ich mich hier entschieden, die gleichen
+Frequenzen wie bei Sitosterol anzunehmen. Alternativ hätte man auch die
+Frequenzen aus dem Referenzgenom verwenden können.
 
 Nach diesen Harmonisierungsschritten kann man nun die Listen erzeugen,
-die als Input fuer die *coloc* Funktion benoetigt werden.
+die als Input für die *coloc* Funktion benötigt werden.
 
 ## Coloc
 
@@ -382,16 +382,16 @@ D3 <- list(
 )
 ```
 
-Jetzt koennen wir endlich paarweise testen.
+Jetzt können wir endlich paarweise testen.
 
-**Hinweis**: Coloc ist eine Bayesianische Inferenzmethode und benoetigt
+**Hinweis**: Coloc ist eine Bayesianische Inferenzmethode und benötigt
 prior probabilities:
 
-- p1: prior probability dass ein SNP mit dem ersten Phaenotyp assoziiert
+- p1: prior probability dass ein SNP mit dem ersten Phänotyp assoziiert
   ist (default 1e-4)
-- p2: prior probability dass ein SNP mit dem zweiten Phaenotyp
-  assoziiert ist (default 1e-4)
-- p12: prior probability dass ein SNP mit beiden Phaenotypen assoziiert
+- p2: prior probability dass ein SNP mit dem zweiten Phänotyp assoziiert
+  ist (default 1e-4)
+- p12: prior probability dass ein SNP mit beiden Phänotypen assoziiert
   ist (default 1e-5)
 
 ``` r
@@ -420,10 +420,10 @@ coloc_res3 = coloc.abf(D2, D3, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
 
 **Zusammenfassung**: in der paarweisen Analyse teilen sich LDL und CAD,
 und SIT und CAD ein kausales Signal, aber beim Vergleich SIT zu LDL ist
-die posterior probability fuer unterschiedliche kausale Signale am
-staerksten.
+die posterior probability für unterschiedliche kausale Signale am
+stärksten.
 
-Was passiert, wenn wir alle drei Phaenotypen gleichzeitig analysieren?
+Was passiert, wenn wir alle drei Phänotypen gleichzeitig analysieren?
 
 ``` r
 betas = as.matrix(tab[,c(9,16,5),with=F])
@@ -453,7 +453,7 @@ tab[rsID == "rs76866386",]
     ##       SE_SIT    pval_SIT N_SIT  MAF_CAD    MAF_SIT    MAF_LDL
     ## 1: 0.0133023 2.73675e-80  9755 0.058038 0.06340521 0.06340521
 
-Mittels HyperColoc koennen wir sagen, dass LDL und CAD mit 97% posterior
+Mittels HyperColoc können wir sagen, dass LDL und CAD mit 97% posterior
 probability sich ein kausale Signal teilen, rs76866386, aber nicht mit
 SIT.
 
@@ -461,10 +461,10 @@ Woran kann das liegen? Im Plot haben wir anfangs gesehen, dass das
 Signal nicht gleich ausschaut: bei SIT gibt es zwei Mini-Cluster mit
 extrem niedrigen p-Werten, einmal um $1 \cdot 10^{-150}$ herum und eines
 um die $1 \cdot 10^{-110}$ herum. Was passiert wenn wir diese SNPs
-weglassen? Diese stellen womoeglich ein Sitosterol-spezifisches Signal
-dar (mehrere unabhaengige Hits ab gleichen Lokus)
+weglassen? Diese stellen womöglich ein Sitosterol-spezifisches Signal
+dar (mehrere unabhängige Hits ab gleichen Lokus)
 
-## Sensitivitaet
+## Sensitivität
 
 ``` r
 tab2 = copy(tab)
@@ -553,10 +553,10 @@ tab2[rsID == "rs75331444",]
     ##       pval_SIT N_SIT  MAF_CAD   MAF_SIT   MAF_LDL
     ## 1: 2.17319e-81  9755 0.057324 0.0637627 0.0637627
 
-Jetzt teilen sich alle drei Phaenotypen ein kausales Signal.
+Jetzt teilen sich alle drei Phänotypen ein kausales Signal.
 
-Man kann also sagen, dass es an diesem Lokus ein Signal fuer SIT, LDL,
-und CAD gibt, aber das es bei SIT zusaetzlich noch weitere Signale gibt.
+Man kann also sagen, dass es an diesem Lokus ein Signal für SIT, LDL,
+und CAD gibt, aber das es bei SIT zusätzlich noch weitere Signale gibt.
 
 # SessionInfo
 
@@ -614,4 +614,4 @@ message("\nTOTAL TIME : " ,round(difftime(Sys.time(),time0,units = "mins"),3)," 
 ```
 
     ## 
-    ## TOTAL TIME : 0.125 minutes
+    ## TOTAL TIME : 0.124 minutes
