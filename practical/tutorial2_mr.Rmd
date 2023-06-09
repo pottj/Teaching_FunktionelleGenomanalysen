@@ -4,7 +4,7 @@ subtitle: "Tutorial 2: Mendelian Randomization"
 author: "Dr. Janne Pott"
 date: "09.-11. Juni 2023"
 output: 
-  html_document:
+  github_document:
     toc: true
     toc_depth: 2
 ---
@@ -73,7 +73,7 @@ Die Datensätze sind jeweils schon eingeschränkt auf Chromosom 2 und die Region
 
 ## Hintergrund
 
-![Vergleich RCT vs. MR](../figures/Practical_MR){width=50%}
+![Vergleich RCT vs. MR](../figures/Practical_MR.jpg){width=50%}
 
 Das Ziel einer MR ist die Beschreibung von einem kausalen Effekt von einem Risikofaktor *X* auf ein Outcome bzw. Krankheit *Y*. 
 
@@ -86,25 +86,22 @@ Bei einer MR Studie werden die Probanden stattdessen aufgrund ihres Genotyps in 
 3) Der SNP *G* ist unabhängig von *Y*, bis auf den Effekt der durch *X* vermittelt wird, d.h. es gibt keinen direkten Effekt von *G* auf *Y*. 
 
 Während man die erste Bedingung gut nachweisen kann, kann man die anderen beiden nur plausibilisieren (man kennt nicht alle Confounder; man kann nur für die testen, zu denen man Daten hat). Wenn die Bedingungen (plausibel) erfüllt sind, kann man mittels folgenden Model einen Ratio-Schätzer ableiten ($\beta_{IV}$, durch die Genetik erklärte Effekt von *X* auf *Y*, *IV*= instrumenal variable): 
-  
-\begin{align}
-Y \sim \beta_{IV} \cdot X &= \beta_{IV} \cdot (\beta_X \cdot G) = \beta_Y \cdot G \notag \\
-\Longrightarrow \hat{\beta}_{IV} &= \frac{\hat{\beta}_Y}{\hat{\beta}_X} \notag
-\end{align}
+
+$$ Y \sim \beta_{IV} \cdot X = \beta_{IV} \cdot (\beta_X \cdot G) = \beta_Y \cdot G$$
+
+$$ \Longrightarrow \hat{\beta}_{IV} = \frac{\hat{\beta}_Y}{\hat{\beta}_X}$$
 
 Den Standardfehler kann mittels der Delta-Methode bestimmen. Üblicherweise schneidet man nach dem ersten oder zweiten Term ($SE_1$ bzw. $SE_2$) ab: 
   
-\begin{align}
-SE_1(\hat{\beta}_{IV}) &= \sqrt{se(\hat{\beta}_Y^2) / \hat{\beta}_X^2} \notag \\
-SE_2(\hat{\beta}_{IV}) &= \sqrt{\frac{se(\hat{\beta}_Y)^2}{\hat{\beta}_X^2} + \frac{\hat{\beta}_Y^2se(\hat{\beta}_X)^2}{\hat{\beta}_X^4}} \notag
-\end{align}
+$$SE_1(\hat{\beta}_{IV}) = \sqrt{se(\hat{\beta}_Y^2) / \hat{\beta}_X^2}$$
+
+$$SE_2(\hat{\beta}_{IV}) = \sqrt{\frac{se(\hat{\beta}_Y)^2}{\hat{\beta}_X^2} + \frac{\hat{\beta}_Y^2se(\hat{\beta}_X)^2}{\hat{\beta}_X^4}}$$
 
 Mit der oben gezeigten Ratio-Methode kann man einzelne SNPs verwenden. Allerdings hat man meistens mehrere genetische Assoziationen, die man auch in einer Meta-Analyse kombinieren kann, um robustere Ergebnisse zu erhalten. Dies funktioniert auch, wenn die Statistiken von unterschiedlichen GWASs stammen und entspricht einem fixed Effekt Modell. Man sollte vorher sicherstellen, dass die SNPs nicht korreliert sind. Falls doch kann man die Korrelationsmatrix verwenden um darauf zu korrigieren. 
 
-\begin{align}
-\hat\beta_{IV,IVW} &= \frac{\sum{\hat{\beta}_Y}\hat{\beta}_Xse(\hat{\beta}_Y)^{-2}}{\sum{\hat{\beta}_X^2se(\hat{\beta}_Y)^{-2}}} \notag \\
-SE(\hat\beta_{IV,IVW}) &= \sqrt{\frac{1}{\sum{\hat{\beta}_X^2se(\hat{\beta}_Y)^{-2}}}} \notag 
-\end{align}
+$$\hat\beta_{IV,IVW} = \frac{\sum{\hat{\beta}_Y}\hat{\beta}_Xse(\hat{\beta}_Y)^{-2}}{\sum{\hat{\beta}_X^2se(\hat{\beta}_Y)^{-2}}}$$ 
+
+$$SE(\hat\beta_{IV,IVW}) = \sqrt{\frac{1}{\sum{\hat{\beta}_X^2se(\hat{\beta}_Y)^{-2}}}}$$
 
 In dem Paket **MendelianRandomization** sind inzwischen viele Varianten der MR mittels Summary Statistics implementiert. Die IVW-Methode ist nur eine davon. Andere berücksichtigen etwaige Pleiotropie (z.B. *MR_egger*). 
 
@@ -166,7 +163,7 @@ MR_object1 = mr_input(bx = tab_MR$beta_SIT,
                       outcome = "LDL-C levels")
 
 res1 = mr_allmethods(MR_object1)
-mr_plot(object = MR_object1, interactive = T,line = "ivw")
+mr_plot(object = MR_object1, interactive = F,labels = T,line = "ivw")
 res1
 
 res1_ivw = mr_ivw(MR_object1)
@@ -188,7 +185,7 @@ MR_object2 = mr_input(bx = tab_MR$beta_SIT[-2],
                       outcome = "LDL-C levels")
 
 res2 = mr_allmethods(MR_object2)
-mr_plot(object = MR_object2, interactive = T,line = "ivw")
+mr_plot(object = MR_object2, interactive = F,labels = T,line = "ivw")
 
 res1@Values[4,]
 res2@Values[4,]
@@ -219,8 +216,8 @@ MR_object4 = mr_input(bx = tab_MR$beta_SIT[-2],
                       exposure = "sitosterol levels", 
                       outcome = "CAD")
 
-mr_plot(object = MR_object3, interactive = T,line = "ivw")
-mr_plot(object = MR_object4, interactive = T,line = "ivw")
+mr_plot(object = MR_object3, interactive = F,labels = T,line = "ivw")
+mr_plot(object = MR_object4, interactive = F,labels = T,line = "ivw")
 
 res3 = mr_allmethods(MR_object3)
 res4 = mr_allmethods(MR_object4)
@@ -245,5 +242,4 @@ Wir finden ebenfalls einen kausalen Zusammenhang zu Koronarer Herzkrankheit. Wen
 sessionInfo()
 message("\nTOTAL TIME : " ,round(difftime(Sys.time(),time0,units = "mins"),3)," minutes")
 ```
-
 
