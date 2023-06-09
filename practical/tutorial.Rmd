@@ -8,7 +8,6 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-setwd("~/03_teaching/2306_MScClinicalResearch/Teaching_FunktionelleGenomanalysen/practical/")
 ```
 
 ## Allgemeine Informationen
@@ -32,297 +31,44 @@ Weitere Inforamtionen zum *coloc* R-Paket finden Sie unter https://chr1swallace.
 
 ### Initialisierung
 
-Zuerst laden wir alle notwendigen Pakete.
+Zuerst laden wir alle notwendigen Pakete und legen die Genregion fest.
 
-```{r init}
+```{r cars}
 # load required packages
 library(coloc)
 library(data.table)
 setDTthreads(1)
 library(ggplot2)
 library(ggpubr)
-library(hyprcoloc)
-library(plyr)
+```
+
+Zusaetzlich legen wir die Genregion fest, die wir analysieren wollen 
+
+```{r generegion}
+genechr = 1
+genestart = 1
+genestop = 1
+genewindow = 200
+  
 ```
 
 ### Daten einlesen
 Im Moodle-Kurs finden Sie eine .RData Datei, die bereits alle notwendigen Tabellen enthaelt und einfach in R eingelesen werden kann. Sie enthaelt die folgenden *data.tables*:
 
-- tab_LDL 
-- tab_CAD
-- tab_SIT
+- tab_ldl 
+- tab_cad
+- tab_sit
 
 Das R-Paket *data.table* ist sehr performant fuer das handling von grossen Daten in R. Weitere Infos dazu finden Sie unter https://r-datatable.com.
 
-```{r load}
-load("RPractical.RData")
+```{r load, eval = FALSE}
+load()
 ls()
 
-str(tab_LDL)
-str(tab_CAD)
-str(tab_SIT)
+str(tab_ldl)
+str(tab_cad)
+str(tab_sit)
 
-tab_SIT[pval_SIT == min(pval_SIT),]
-
-```
-
-Die Datensaetze sind jeweils schon eingeschraenkt auf Chromosom 2 und die Region um best-assoziierten SNP von SIT herum (Basenposition 44072576 +/- 1 Mio. Basen). 
-
-### Plots
-
-Es ist immer gut, die Daten auch zu visualisieren. Deswegen werden wir zunaechst drei Plots erzeugen, um die lokale Assoziation per Phaenotyp zu sehen. 
-
-```{r plots}
-p1 <- ggplot(tab_LDL, aes(x = pos, y = -log10(pval_LDL))) +
-  geom_point() +
-  labs(x = "", y = bquote(-log[10](italic(p))),
-       title = "LDL-cholesterol") +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  scale_x_continuous(breaks = c(43000000, 43500000, 44000000, 44500000, 45000000),
-                     labels = c(43000, 43500, 44000, 44500, 45000))
-
-p2 <- ggplot(tab_CAD, aes(x = pos, y = -log10(pval_CAD))) +
-  geom_point() +
-  labs(x = "", y = bquote(-log[10](italic(p))),
-         title = "CAD risk") +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  scale_x_continuous(breaks = c(43000000, 43500000, 44000000, 44500000, 45000000),
-                     labels = c(43000, 43500, 44000, 44500, 45000))
-
-p3 <- ggplot(tab_SIT, aes(x = pos, y = -log10(pval_SIT))) +
-  geom_point() +
-  labs(x = "", y = bquote(-log[10](italic(p))),
-         title = "Sitosterol") +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  scale_x_continuous(name = paste0("Chromosome 2, Position (kb)"),
-                     breaks = c(43000000, 43500000, 44000000, 44500000, 45000000),
-                     labels = c(43000, 43500, 44000, 44500, 45000))
-
-ggpubr::ggarrange(p1, p2,p3,
- heights = c(1, 1), nrow = 3, 
- ncol = 1, align = "hv")
-```
-
-Es gibt also fuer alle drei Phaenotypen ein Signal, aber wir koennen die Region auch verkleinern, da die Assoziationen am Rand alle nicht genomweit signifkant sind. 
-
-```{r filt}
-tab_LDL = tab_LDL[pos > 44072576 - 125000 & pos < 44072576 + 125000,]
-tab_CAD = tab_CAD[pos > 44072576 - 125000 & pos < 44072576 + 125000,]
-tab_SIT = tab_SIT[pos > 44072576 - 125000 & pos < 44072576 + 125000,]
-
-p1 <- ggplot(tab_LDL, aes(x = pos, y = -log10(pval_LDL))) +
-  geom_point() +
-  labs(x = "", y = bquote(-log[10](italic(p))),
-       title = "LDL-cholesterol") +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  scale_x_continuous(breaks = c(43000000, 43500000, 44000000, 44500000, 45000000),
-                     labels = c(43000, 43500, 44000, 44500, 45000))
-
-p2 <- ggplot(tab_CAD, aes(x = pos, y = -log10(pval_CAD))) +
-  geom_point() +
-  labs(x = "", y = bquote(-log[10](italic(p))),
-         title = "CAD risk") +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  scale_x_continuous(breaks = c(43000000, 43500000, 44000000, 44500000, 45000000),
-                     labels = c(43000, 43500, 44000, 44500, 45000))
-
-p3 <- ggplot(tab_SIT, aes(x = pos, y = -log10(pval_SIT))) +
-  geom_point() +
-  labs(x = "", y = bquote(-log[10](italic(p))),
-         title = "Sitosterol") +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  scale_x_continuous(name = paste0("Chromosome 2, Position (kb)"),
-                     breaks = c(43000000, 43500000, 44000000, 44500000, 45000000),
-                     labels = c(43000, 43500, 44000, 44500, 45000))
-
-ggpubr::ggarrange(p1, p2,p3,
- heights = c(1, 1), nrow = 3, 
- ncol = 1, align = "hv")
 
 ```
-
-### Harmonisierung
-
-Der Vergleich kann nur mit SNPs durchgefuerht werden, die fuer beide bzw alle drei Phaenotypen vorhanden sind. Daher werden nun die drei Tabellen zusammengefuegt. 
-
-```{r combine}
-tab_LDL[,chr := 2]
-tab_dummy = data.frame(pos = unique(c(tab_CAD$pos, tab_LDL$pos, tab_SIT$pos)))
-
-tab = Reduce(function(x, y) plyr::join(x, y), list(tab_dummy, tab_CAD, tab_LDL, tab_SIT))
-
-tab = tab[complete.cases(tab),]
-
-```
-
-Die Richtung des Effekts ist fuer die Colokalisierung nicht relevant. Daher muss nicht zwingend auf das gleiche Effektallel gedreht werden. Aber es ist sehr ratsam zumindest zu pruefen, dass die gleichen zwei Allele getestet wurden. In diesem Tutorial werden ich die Allele jetzt angleichen. 
-
-```{r harmonize}
-setDT(tab)
-tab[,table(EA_SIT == EA_LDL, OA_SIT == EA_LDL)]
-tab[,table(EA_SIT == EA_CAD, OA_SIT == EA_CAD)]
-
-tab = tab[EA_SIT == EA_CAD | OA_SIT == EA_CAD,]
-tab[,table(EA_SIT == EA_CAD, OA_SIT == EA_CAD)]
-
-plot(tab$EAF_SIT, tab$EAF_CAD)
-
-tab[OA_SIT == EA_LDL, beta_LDL := beta_LDL * (-1)]
-tab[OA_SIT == EA_CAD, beta_CAD := beta_CAD * (-1)]
-tab[OA_SIT == EA_CAD, EAF_CAD := 1 - EAF_CAD]
-
-plot(tab$EAF_SIT, tab$EAF_CAD)
-
-tab[,EA_CAD := NULL]
-tab[,OA_CAD := NULL]
-tab[,EA_LDL := NULL]
-tab[,OA_LDL := NULL]
-
-tab[,MAF_CAD := ifelse(EAF_CAD < 0.5, EAF_CAD, 1 - EAF_CAD)]
-tab[,MAF_SIT := ifelse(EAF_SIT < 0.5, EAF_SIT, 1 - EAF_SIT)]
-tab[,MAF_LDL := MAF_SIT]
-```
-
-**Hinweis**: Fuer die LDL Daten waren in den Summary Statistics keine EAF Information gegeben. Daher habe ich mich hier entschieden, die gleichen Frequenzen wie bei Sitosterol anzunehmen. Alternativ haette man auch die Frequenzen aus dem Referenzgenom verwenden koennen. 
-
-Nach diesen Harmonisierungsschritten kann man nun die Listen erzeugen, die als Input fuer die *coloc* Funktion benoetigt werden.
-
-### Coloc
-
-```{r getLists}
-D1 <- list(
- type = "quant", # quantitative trait
- beta = tab$beta_LDL,
- varbeta = tab$SE_LDL^2, # note that this is standard error squared
- pvalues = tab$pval_LDL,
- N = tab$N_LDL,
- MAF = tab$MAF_LDL,
- snp = tab$rsID,
- sdY = 1 # external information
-)
-
-D2 <- list(
- type = "cc", # case-control trait
- beta = tab$beta_CAD,
- varbeta = tab$SE_CAD^2,
- pvalues = tab$pval_CAD,
- N = 43159+126268, # external information
- s = 43159/(43159+126268), # external information
- MAF = tab$MAF_CAD,
- snp = tab$rsID
-)
-
-D3 <- list(
- type = "quant", # quantitative trait
- beta = tab$beta_SIT,
- varbeta = tab$SE_SIT^2,
- pvalues = tab$pval_SIT,
- N = tab$N_SIT,
- MAF = tab$MAF_SIT,
- snp = tab$rsID,
- sdY = 1 # external information
-)
-
-```
-
-Jetzt koennen wir endlich paarweise testen.
-
-**Hinweis**: Coloc ist eine Bayesianische Inferenzmethode und benoetigt prior probabilities:
-
-- p1: prior probability dass ein SNP mit dem ersten Phaenotyp assoziiert ist (default 1e-4)
-- p2: prior probability dass ein SNP mit dem zweiten Phaenotyp assoziiert ist (default 1e-4)
-- p12: prior probability dass ein SNP mit beiden Phaenotypen assoziiert ist (default 1e-5)
-
-```{r coloc}
-coloc_res1 = coloc.abf(D1, D2, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
-coloc_res2 = coloc.abf(D1, D3, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
-coloc_res3 = coloc.abf(D2, D3, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
-
-```
-
-Zusammenfassung: in der paarweisen Analyse teilen sich LDL und CAD, und SIT und CAD ein kausales Signal, aber beim Vergleich SIT zu LDL ist die posterior probability fuer unterschiedliche kausale Signale am staerksten.   
-
-Was passiert, wenn wir alle drei Phaenotypen gleichzeitig analysieren?
-
-```{r hypercoloc}
-betas = as.matrix(tab[,c(9,16,5),with=F])
-ses = as.matrix(tab[,c(10,17,6),with=F])
-
-hyprcoloc_results <- hyprcoloc(betas, ses, 
-                               trait.names = c("LDL", "SIT","CAD"), 
-                               snp.id = tab$rsID,
-                               binary.outcomes = c(0, 0,1),
-                               prior.1 = 1e-04, prior.c = 0.02)
-hyprcoloc_results$results
-tab[rsID == "rs76866386",]
-```
-
-Mittels HyperColoc koennen wir sagen, dass LDL und CAD mit 97% posterior probability sich ein kausale Signal teilen, rs76866386, aber nicht mit SIT. 
-
-Woran kann das liegen? Im Plot haben wir anfangs gesehen, dass das Signal nicht gleich ausschaut: bei SIT gibt es zwei Mini-Cluster mit extrem niedrigen p-Werten, einmal um $1x10^-150$ herum und eines um die $1x10^-110$ herum. Was passiert wenn wir diese SNPs weglassen? Diese stellen womoeglich ein Sitosterol-spezifisches Signal dar (mehrere unabhaengige Hits ab gleichen Lokus)
-
-### Sensitivitaet
-
-```{r sens}
-tab2 = copy(tab)
-tab2 = tab2[pval_SIT >= 1e-100,]
-D1 <- list(
- type = "quant", # quantitative trait
- beta = tab2$beta_LDL,
- varbeta = tab2$SE_LDL^2, # note that this is standard error squared
- pvalues = tab2$pval_LDL,
- N = tab2$N_LDL,
- MAF = tab2$MAF_LDL,
- snp = tab2$rsID,
- sdY = 1 # external information
-)
-
-D2 <- list(
- type = "cc", # case-control trait
- beta = tab2$beta_CAD,
- varbeta = tab2$SE_CAD^2,
- pvalues = tab2$pval_CAD,
- N = 43159+126268, # external information
- s = 43159/(43159+126268), # external information
- MAF = tab2$MAF_CAD,
- snp = tab2$rsID
-)
-
-D3 <- list(
- type = "quant", # quantitative trait
- beta = tab2$beta_SIT,
- varbeta = tab2$SE_SIT^2,
- pvalues = tab2$pval_SIT,
- N = tab2$N_SIT,
- MAF = tab2$MAF_SIT,
- snp = tab2$rsID,
- sdY = 1 # external information
-)
-
-coloc_res4 = coloc.abf(D1, D2, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
-coloc_res5 = coloc.abf(D1, D3, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
-coloc_res6 = coloc.abf(D2, D3, p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
-
-betas = as.matrix(tab2[,c(9,16,5),with=F])
-ses = as.matrix(tab2[,c(10,17,6),with=F])
-
-hyprcoloc_results2 <- hyprcoloc(betas, ses, 
-                               trait.names = c("LDL", "SIT","CAD"), 
-                               snp.id = tab$rsID,
-                               binary.outcomes = c(0, 0,1),
-                               prior.1 = 1e-04, prior.c = 0.02)
-hyprcoloc_results2$results
-tab2[rsID == "rs75331444",]
-```
-
-Jetzt teilen sich alle drei Phaenotypen ein kausales Signal. 
-
-Man kann also sagen, dass es an diesem Lokus ein Signal fuer SIT, LDL, und CAD gibt, aber das es bei SIT zusaetzlich noch weitere Signale gibt. 
-
 
