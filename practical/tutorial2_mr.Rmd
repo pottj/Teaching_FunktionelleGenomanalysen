@@ -1,0 +1,249 @@
+---
+title: "Funktionelle Genomanalysen 2023 (09-CRT-A006)"
+subtitle: "Tutorial 2: Mendelian Randomization" 
+author: "Dr. Janne Pott"
+date: "09.-11. Juni 2023"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("~/03_teaching/2306_MScClinicalResearch/Teaching_FunktionelleGenomanalysen/practical/")
+time0<-Sys.time()
+
+```
+
+# Allgemeine Informationen
+
+**Ziel**: Das Ziel dieses Tutoriums ist es, für drei Phänotypen eine Mendelische Randomisierungsstudie durchzuführen, um die praktische Anwendung und Interpretation der Ergebnisse dieser Methode aufzuzeigen. 
+
+**Daten**: Wir werden in diesem Beispiel Teilmengen von bereits publizierten GWAS verwenden
+
+- LDLC Summary Statistics von [Surakka, I. et al. Nat Genet (2015).](https://www.nature.com/articles/ng.3300), [Link to complete data](http://diagram-consortium.org/2015_ENGAGE_1KG/)
+- CAD Summary Statistics von [Nikpay, M. et al. Nat Genet (2015).](https://www.nature.com/articles/ng.3396), [Link to complete data](http://www.cardiogramplusc4d.org/data-downloads/)
+- Sitosterol Summary Statistics von [Scholz, M. et al. Nat Commun (2022).](https://www.nature.com/articles/s41467-021-27706-6), [Link to complete data](https://zenodo.org/record/5607613) 
+
+**Hinweis**: Das Sitosterol-Paper kennen Sie bereits aus der Vorlesung. Wir werden hier ähnliche Analysen durchführen, aber nicht die exakt gleichen, da wir *nur* die Summary Statistics und nicht die konditionierten Statistiken verwenden werden. Zusätzlich wird nur der Lokus auf Chromosom 2 betrachtet. Es handelt sich also nur um ein Minimal-Beispiel, wir werden nicht die exakten Werte der Publikation replizieren. 
+
+## Initialisierung 
+
+zuerst laden wir alle notwendigen Pakete. Es handelt sich hierbei um **alle** Pakete für beide Tutorials! 
+
+```{r init, warning=FALSE}
+# load required packages
+library(coloc)
+library(data.table)
+setDTthreads(1)
+library(ggplot2)
+library(ggpubr)
+library(hyprcoloc)
+library(plyr)
+library(MendelianRandomization)
+
+```
+
+## Daten einlesen
+
+Im Moodle-Kurs finden Sie eine .RData Datei, die bereits alle notwendigen Tabellen enthält und einfach in R eingelesen werden kann. Sie enthält die folgenden *data.tables*:
+
+- tab_LDL 
+- tab_CAD
+- tab_SIT
+
+Das R-Paket *data.table* ist sehr performant für das handling von großen Daten in R. Weitere Infos dazu finden Sie unter https://r-datatable.com.
+
+```{r load}
+load("RPractical.RData")
+ls()
+
+str(tab_LDL)
+str(tab_CAD)
+str(tab_SIT)
+
+tab_SIT[pval_SIT == min(pval_SIT),]
+
+```
+
+Die Datensätze sind jeweils schon eingeschränkt auf Chromosom 2 und die Region um best-assoziierten SNP von SIT herum (Basenposition 44072576 +/- 1 Mio. Basen). 
+
+# Mendelian Randomization
+
+## Hintergrund
+
+![Vergleich RCT vs. MR](../figures/Practical_MR){width=50%}
+
+Das Ziel einer MR ist die Beschreibung von einem kausalen Effekt von einem Risikofaktor *X* auf ein Outcome bzw. Krankheit *Y*. 
+
+Bei einer klassischen randomisierten Studie werden die Probanden in zwei Gruppen geteilt, wobei die eine Gruppe die Intervention/das Medikament bekommt, während die andere nur ein Placebo erhält. 
+
+Bei einer MR Studie werden die Probanden stattdessen aufgrund ihres Genotyps in Gruppen geteilt, die mit Risiko-Allel gegen diejenigen  ohne das Risiko-Allel. Man kann von einer Randomisierung während Meiose ausgehen, und berücksichtigt nur noch die genetisch vorhergesagten Werte von $X$ und $Y$ bzw. die genetischen Effekt auf $X$ und $Y$. Um valide kausale Schätzer zu erhalten müssen drei Bedingungen gelten:
+  
+1) Die Assoziation der genetischen Variante *G* auf *X* ist **stark**, z.B. genomweit signifikant. 
+2) Der SNP *G* ist unabhängig von **allen** Confoundern *U*, d.h. *G* ist nicht auch mit diesen assoziiert. 
+3) Der SNP *G* ist unabhängig von *Y*, bis auf den Effekt der durch *X* vermittelt wird, d.h. es gibt keinen direkten Effekt von *G* auf *Y*. 
+
+Während man die erste Bedingung gut nachweisen kann, kann man die anderen beiden nur plausibilisieren (man kennt nicht alle Confounder; man kann nur für die testen, zu denen man Daten hat). Wenn die Bedingungen (plausibel) erfüllt sind, kann man mittels folgenden Model einen Ratio-Schätzer ableiten ($\beta_{IV}$, durch die Genetik erklärte Effekt von *X* auf *Y*, *IV*= instrumenal variable): 
+  
+\begin{align}
+Y \sim \beta_{IV} \cdot X &= \beta_{IV} \cdot (\beta_X \cdot G) = \beta_Y \cdot G \notag \\
+\Longrightarrow \hat{\beta}_{IV} &= \frac{\hat{\beta}_Y}{\hat{\beta}_X} \notag
+\end{align}
+
+Den Standardfehler kann mittels der Delta-Methode bestimmen. Üblicherweise schneidet man nach dem ersten oder zweiten Term ($SE_1$ bzw. $SE_2$) ab: 
+  
+\begin{align}
+SE_1(\hat{\beta}_{IV}) &= \sqrt{se(\hat{\beta}_Y^2) / \hat{\beta}_X^2} \notag \\
+SE_2(\hat{\beta}_{IV}) &= \sqrt{\frac{se(\hat{\beta}_Y)^2}{\hat{\beta}_X^2} + \frac{\hat{\beta}_Y^2se(\hat{\beta}_X)^2}{\hat{\beta}_X^4}} \notag
+\end{align}
+
+Mit der oben gezeigten Ratio-Methode kann man einzelne SNPs verwenden. Allerdings hat man meistens mehrere genetische Assoziationen, die man auch in einer Meta-Analyse kombinieren kann, um robustere Ergebnisse zu erhalten. Dies funktioniert auch, wenn die Statistiken von unterschiedlichen GWASs stammen und entspricht einem fixed Effekt Modell. Man sollte vorher sicherstellen, dass die SNPs nicht korreliert sind. Falls doch kann man die Korrelationsmatrix verwenden um darauf zu korrigieren. 
+
+\begin{align}
+\hat\beta_{IV,IVW} &= \frac{\sum{\hat{\beta}_Y}\hat{\beta}_Xse(\hat{\beta}_Y)^{-2}}{\sum{\hat{\beta}_X^2se(\hat{\beta}_Y)^{-2}}} \notag \\
+SE(\hat\beta_{IV,IVW}) &= \sqrt{\frac{1}{\sum{\hat{\beta}_X^2se(\hat{\beta}_Y)^{-2}}}} \notag 
+\end{align}
+
+In dem Paket **MendelianRandomization** sind inzwischen viele Varianten der MR mittels Summary Statistics implementiert. Die IVW-Methode ist nur eine davon. Andere berücksichtigen etwaige Pleiotropie (z.B. *MR_egger*). 
+
+## Vorbereitung
+Zunächst reduzieren wir unsere Tabelle auf die vier unabhängigen SNPs: 
+
+```{r MR_filt}
+# same steps as in coloc tutorial!
+tab_LDL[,chr := 2]
+tab_dummy = data.frame(pos = unique(c(tab_CAD$pos, tab_LDL$pos, tab_SIT$pos)))
+tab = Reduce(function(x, y) plyr::join(x, y), list(tab_dummy, tab_CAD, tab_LDL, tab_SIT))
+tab = tab[complete.cases(tab),]
+setDT(tab)
+
+tab_MR = copy(tab)
+tab_MR = tab_MR[rsID %in% c("rs4299376","rs11887534","rs7598542","rs78451356")]
+tab_MR
+```
+
+Diese vier SNPs sind unabhängig bzw haben unabhängige Effekte gemäß der konditionierten Analyse, die Sie in der Phytosterol-Publikation nachlesen können. Nur rs11887534 ist korreliert mit den beiden SNPs, die in der Coloc-Analyse als kausales geteiltes Signal erkannt wurden: 
+
+- rs11887534 und rs76866386: $r^2 = 0.933$
+- rs11887534 und rs75331444: $r^2 = 0.946$
+- rs76866386 und rs75331444: $r^2 = 0.986$
+
+Nun müssen wir noch die Effekte anpassen: zum einen muss immer das gleiche Effekt-Allel verwendet werden (zwingend notwendig), zum anderen wollen wir immer einen positiven Effekt auf Sitosterol (optional, ändert nicht den Schätzer, nur den Plot).  
+
+```{r reformat}
+tab_MR[,EA := c("G","G","G","G")]
+tab_MR[,OA := c("T","C","T","C")]
+
+tab_MR[,table(EA == EA_LDL, OA == EA_LDL)]
+tab_MR[OA == EA_LDL, beta_LDL := beta_LDL * (-1)]
+
+tab_MR[,table(EA == EA_CAD, OA == EA_CAD)]
+tab_MR[OA == EA_CAD, beta_CAD := beta_CAD * (-1)]
+tab_MR[OA == EA_CAD, EAF_CAD := 1- EAF_CAD]
+
+tab_MR[,table(EA == EA_SIT, OA == EA_SIT)]
+tab_MR[OA == EA_SIT, beta_SIT := beta_SIT * (-1)]
+tab_MR[OA == EA_SIT, EAF_SIT := 1- EAF_SIT]
+
+```
+
+## Sitosterol auf LDLC
+
+zuerst testen wir den kausalen Effekt von Sitosterol auf LDLC. Dabei erstellen wir die Ratio-Schätzer (nur zum Vergleich) und die Kombination aller vier Schätzer (alle Methoden des R-Pakets *MendelianRandomization*). Da es sich hierbei auch um eine Meta-Analyse handelt, werden auch hier Heterogenitätsschätzer mit-ausgegeben. Dazu muss man jedoch spezifisch eine Methode auswählen (hier im Beispiel nehmen wir IVW). 
+
+```{r MR_ratio}
+tab_MR[,beta_LDL/beta_SIT]
+tab_MR[,sqrt(SE_LDL^2/beta_SIT^2)]
+
+MR_object1 = mr_input(bx = tab_MR$beta_SIT, 
+                      bxse = tab_MR$SE_SIT,
+                      by = tab_MR$beta_LDL,
+                      byse = tab_MR$SE_LDL,
+                      snps = tab_MR$rsID,
+                      exposure = "sitosterol levels", 
+                      outcome = "LDL-C levels")
+
+res1 = mr_allmethods(MR_object1)
+mr_plot(object = MR_object1, interactive = T,line = "ivw")
+res1
+
+res1_ivw = mr_ivw(MR_object1)
+res1_ivw@Heter.Stat
+```
+
+Wir sehen also einen kausale Beziehung von SIT auf LDLC über alle Methoden hinweg, und in der Egger-Methode ist der Intercept nicht signifikant von 0 unterschiedlich, was auf keine Pleiotropie hindeutet. 
+
+Es ist eine gewisse Effekt-Heterogenität vorhanden (Cochrans Q = 10.1, p=0.02). Im Plot kann man erkennen, dass rs11887534, das mit LDL und CAD in Coloc als geteilt gefunden wurde, den stärksten Effekt hat. Man könnte hier mittels "leave one out" diese Variante entfernen und prüfen, ob immer noch ein Effekt übrig bleibt und ob die Heterogenität durch diesen SNP verursacht wurde: 
+
+```{r MR_LeaveOneOut}
+tab_MR$rsID
+MR_object2 = mr_input(bx = tab_MR$beta_SIT[-2], 
+                      bxse = tab_MR$SE_SIT[-2],
+                      by = tab_MR$beta_LDL[-2],
+                      byse = tab_MR$SE_LDL[-2],
+                      snps = tab_MR$rsID[-2],
+                      exposure = "sitosterol levels", 
+                      outcome = "LDL-C levels")
+
+res2 = mr_allmethods(MR_object2)
+mr_plot(object = MR_object2, interactive = T,line = "ivw")
+
+res1@Values[4,]
+res2@Values[4,]
+
+res2_ivw = mr_ivw(MR_object2)
+res2_ivw@Heter.Stat
+
+```
+
+Wenn nur noch diese drei Varianten verwendet werden, gibt es immer noch ein signifikantes Ergebnis, und die Konfidenzintervalle der zwei Sets überlappen. AUch die Heterogenität nimmt ab und ist nicht mehr signifikant. 
+
+## Sitosterol auf CAD
+
+```{r MR_CAD}
+MR_object3 = mr_input(bx = tab_MR$beta_SIT, 
+                      bxse = tab_MR$SE_SIT,
+                      by = tab_MR$beta_CAD,
+                      byse = tab_MR$SE_CAD,
+                      snps = tab_MR$rsID,
+                      exposure = "sitosterol levels", 
+                      outcome = "CAD")
+
+MR_object4 = mr_input(bx = tab_MR$beta_SIT[-2], 
+                      bxse = tab_MR$SE_SIT[-2],
+                      by = tab_MR$beta_CAD[-2],
+                      byse = tab_MR$SE_CAD[-2],
+                      snps = tab_MR$rsID[-2],
+                      exposure = "sitosterol levels", 
+                      outcome = "CAD")
+
+mr_plot(object = MR_object3, interactive = T,line = "ivw")
+mr_plot(object = MR_object4, interactive = T,line = "ivw")
+
+res3 = mr_allmethods(MR_object3)
+res4 = mr_allmethods(MR_object4)
+res3@Values[4,]
+res4@Values[4,]
+
+res3_ivw = mr_ivw(MR_object3)
+res4_ivw = mr_ivw(MR_object4)
+res3_ivw@Heter.Stat
+res4_ivw@Heter.Stat
+
+```
+
+Wir finden ebenfalls einen kausalen Zusammenhang zu Koronarer Herzkrankheit. Wenn wir nun zunsatzlich wissen, wie der MR-Schätzer für LDLC auf CAD ist, können wir abschätzen, wie viel vom Sitosterol-Effekt über LDLC mediiert wird. 
+
+**Hinweis**: Mit diesen zur Verfügung gestellten Daten lässt sich der LDLC Effekt nicht bestimmen, da hier nur ein Lipid-Lokus enthalten ist, aber LDLC sehr polygenetisch ist (über 200 Risiko-Loki bekannt). Zusätzlich müssen die verwendeten SNPs für unterschiedliche Risikofaktoren ebenfalls unterschiedlich bzw. nicht in LD sein. Diese Annahme ist in unserem kleinen Beispieldatensatz verletzt. 
+
+
+# SessionInfo
+
+```{r sessionInfo}
+sessionInfo()
+message("\nTOTAL TIME : " ,round(difftime(Sys.time(),time0,units = "mins"),3)," minutes")
+```
+
+
