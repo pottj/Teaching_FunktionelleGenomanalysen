@@ -68,7 +68,7 @@
 
 \textbf{Option 1} (typische GWAS Regression, additives Modell):
 
-$$ y = \mu + \beta_1 \cdot G + \epsilon \text{; mit AA=0, AB=1, und BB=2}$$
+$$ x = \mu + \beta_1 \cdot G + \epsilon \text{; mit AA=0, AB=1, und BB=2}$$
 
 Nullhypothese: Der SNP $G$ hat keinen Effekt auf $X$ ($H_0: \beta_1 = 0$)
 
@@ -82,11 +82,11 @@ Nullhypothese: Der SNP $G$ hat keinen Effekt auf $X$ ($H_0: \beta_1 = 0$)
 
 \textbf{Option 1} (typische GWAS Regression, additives Modell):
 
-$$ y = \mu + \beta_1 \cdot G + \epsilon \text{; mit AA=0, AB=1, und BB=2}$$
+$$ x = \mu + \beta_1 \cdot G + \epsilon \text{; mit AA=0, AB=1, und BB=2}$$
 
 \textbf{Option 2} (rezessives Modell):
 
-$$ y = \mu + \beta_1 \cdot G + \epsilon \text{; mit AA=0, AB=0, und BB=1}$$
+$$ x = \mu + \beta_1 \cdot G + \epsilon \text{; mit AA=0, AB=0, und BB=1}$$
 
 Nullhypothese: Der SNP $G$ hat keinen Effekt auf $X$ ($H_0: \beta_1 = 0$)
 
@@ -100,7 +100,7 @@ Nullhypothese: Der SNP $G$ hat keinen Effekt auf $X$ ($H_0: \beta_1 = 0$)
 
 \textbf{Option 3} (komplexeres Modell):
 
-$$ y = \mu + \beta_1 \cdot AB + \beta_2 \cdot BB + \epsilon \text{;  mit AB, BB} \in \{0,1\}$$
+$$ x = \mu + \beta_1 \cdot AB + \beta_2 \cdot BB + \epsilon \text{;  mit AB, BB} \in \{0,1\}$$
 
 $H_0$: $G$ hat keinen Effekt auf $X$ ($\beta_1 = 0$ und $\beta_2 = 0$). 
 
@@ -118,7 +118,7 @@ $H_3$: $G$ hat einen additiven Effekt auf $X$ ($\beta_1 \neq 0$ und $\beta_1 \si
     \item rs127890 sieht nach rezessivem Effekt aus: nur Unterschied zwischen AA/AB und BB
     \item aktuell: nur Analyse von zwei SNPs (= nicht genomweit)
     \item GWAS: Teste \textbf{ALLE} SNPs auf Assoziation mit $X$ (führe die Regressionsanalyse $\sim$ 1 Mio. mal aus)
-    \item Multiples Testen $\rightarrow$ Korrektur der Signifikanzgrenze nötig ($\alpha=0.5 \rightarrow \alpha_{Bonferroni} = \frac{\alpha}{k} = 5\cdot 10^{-8}$, k=Anzahl getesteter SNPs)
+    \item Multiples Testen $\rightarrow$ Korrektur der Signifikanzgrenze nötig ($\alpha=0.05 \rightarrow \alpha_{Bonferroni} = \frac{\alpha}{k} = 5\cdot 10^{-8}$, k=Anzahl getesteter SNPs)
 \end{itemize}
 \end{frame}
 
@@ -170,16 +170,16 @@ Welche Annahme wird hier häufig getroffen und wie kann diese geprüft werden?
 
     \begin{itemize}
         \item genetischer Effekt ist gleich (keine Heterogenität). 
-        \item in gemischten Modell: $y_{i,j} = \mu + b_i + \beta_j \cdot G + \epsilon_{i,j}$
-        \item studien-spezifischer Intercept (random) + fester SNP Effekt (fix = für alle Studien gleich)  
+        \item in gemischten Modell: $x_{ij} = \mu + b_i + \beta_j \cdot G + \epsilon_{ij}$
+        \item studien-spezifischer Intercept für Studie $i$ (random) + fester Effekt für SNP $j$  (fix = für alle Studien gleich)  
     \end{itemize}
 
     \textbf{Random Effect Model (REM)}
 
     \begin{itemize}
         \item genetischer Effekt ist in allen Studien unterschiedlich (Berücksichtigung der Heterogenität). 
-        \item in gemischten Modell: $y_{i,j} = \mu + b_{i1} + b_{ij2} \cdot G + \epsilon_{i,j}$
-        \item studien-spezifischer Intercept (random) + studien-spezifischer SNP Effekt (random) 
+        \item in gemischten Modell: $y_{ij} = \mu + b_{i1} + b_{ij2} \cdot G + \epsilon_{ij}$
+        \item studien-spezifischer Intercept für Studie $i$ (random) + studien-spezifischer Effekt für SNP $j$ (random) 
     \end{itemize}
 
     \textbf{Test}: Cochrans Q oder $I^2$ Statistik
@@ -224,15 +224,15 @@ Welche Annahme wird hier häufig getroffen und wie kann diese geprüft werden?
 \end{frame}
 
 \begin{frame}{Zusatzfrage}
-    \textbf{Typischer SNP-Filterkriterien bei einer Meta-GWAS}: 
+    \textbf{Typischer SNP-Filterkriterien bei einer Meta-GWAS}: (Filtern, wenn...) 
     
     \begin{itemize}
         \item MAF (z.B. $mean(MAF)<0.01$)
         \item MAC (minor allele count, Anzahl des Minorallels, z.B. $MAC<6$)
         \item info-score (z.B. $min(info)<0.8$)
-        \item Heterogenität (z.B. $I^2<0.75$) 
+        \item Heterogenität (z.B. $I^2>0.75$) 
         \item Vollständigkeit zwischen den Studien bzw. mindestens zwei Studien (z.B. $k<2$)
-        \item Bonferroni-adjustierte P-Wert (z.B. $p< \frac{0.05}{1000000} = 5 \cdot 10^{-8}$)
+        \item Bonferroni-adjustierte P-Wert (z.B. $p> \frac{0.05}{1,000,000} = 5 \cdot 10^{-8}$)
         \item LD (abh. von Ethnie, z.B. $r^2>0.1$)
     \end{itemize}
 
